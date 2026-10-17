@@ -40,6 +40,7 @@ CREATE TABLE su_kien (
     so_luong_toi_da INT NOT NULL DEFAULT 100,
     trang_thai ENUM('nhap', 'cong_khai', 'da_huy', 'ket_thuc')
         NOT NULL DEFAULT 'nhap',
+    han_dang_ky DATETIME DEFAULT NULL,
     nguoi_tao_id INT NOT NULL,
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cau_lac_bo_id)
@@ -61,4 +62,27 @@ CREATE TABLE dang_ky (
         REFERENCES su_kien(id),
     FOREIGN KEY (nguoi_dung_id)
         REFERENCES nguoi_dung(id)
+);
+
+-- 5. Thong bao
+CREATE TABLE thong_bao (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nguoi_dung_id INT NOT NULL,
+    su_kien_id INT DEFAULT NULL,
+    tieu_de VARCHAR(200) NOT NULL,
+    noi_dung TEXT NOT NULL,
+    loai VARCHAR(30) NOT NULL DEFAULT 'info',
+    da_doc TINYINT(1) NOT NULL DEFAULT 0,
+    ngay_tao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_thong_bao_nguoi_dung (nguoi_dung_id, da_doc, ngay_tao),
+    INDEX idx_thong_bao_su_kien (su_kien_id),
+
+    FOREIGN KEY (nguoi_dung_id)
+        REFERENCES nguoi_dung(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (su_kien_id)
+        REFERENCES su_kien(id)
+        ON DELETE SET NULL
 );
