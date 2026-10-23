@@ -13,16 +13,20 @@ CREATE TABLE nguoi_dung (
     mat_khau VARCHAR(255) NOT NULL,
     vai_tro ENUM('thanh_vien', 'ban_to_chuc', 'admin')
         NOT NULL DEFAULT 'thanh_vien',
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    so_dien_thoai VARCHAR(20) UNIQUE DEFAULT NULL,
+    ngay_tao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 2. Cau lac bo
 CREATE TABLE cau_lac_bo (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ten_cau_lac_bo VARCHAR(150) NOT NULL,
-    mo_ta TEXT,
-    nguoi_quan_ly_id INT,
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    mo_ta TEXT DEFAULT NULL,
+    nguoi_quan_ly_id INT DEFAULT NULL,
+    ngay_tao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_cau_lac_bo_nguoi_quan_ly (nguoi_quan_ly_id),
+
     FOREIGN KEY (nguoi_quan_ly_id)
         REFERENCES nguoi_dung(id)
         ON DELETE SET NULL
@@ -33,18 +37,23 @@ CREATE TABLE su_kien (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cau_lac_bo_id INT NOT NULL,
     ten_su_kien VARCHAR(200) NOT NULL,
-    mo_ta TEXT,
-    dia_diem VARCHAR(255),
+    mo_ta TEXT DEFAULT NULL,
+    dia_diem VARCHAR(255) DEFAULT NULL,
     thoi_gian_bat_dau DATETIME NOT NULL,
-    thoi_gian_ket_thuc DATETIME,
+    thoi_gian_ket_thuc DATETIME DEFAULT NULL,
     so_luong_toi_da INT NOT NULL DEFAULT 100,
     trang_thai ENUM('nhap', 'cong_khai', 'da_huy', 'ket_thuc')
         NOT NULL DEFAULT 'nhap',
-    han_dang_ky DATETIME DEFAULT NULL,
     nguoi_tao_id INT NOT NULL,
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_tao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    han_dang_ky DATETIME DEFAULT NULL,
+
+    INDEX idx_su_kien_cau_lac_bo (cau_lac_bo_id),
+    INDEX idx_su_kien_nguoi_tao (nguoi_tao_id),
+
     FOREIGN KEY (cau_lac_bo_id)
         REFERENCES cau_lac_bo(id),
+
     FOREIGN KEY (nguoi_tao_id)
         REFERENCES nguoi_dung(id)
 );
@@ -54,12 +63,16 @@ CREATE TABLE dang_ky (
     id INT AUTO_INCREMENT PRIMARY KEY,
     su_kien_id INT NOT NULL,
     nguoi_dung_id INT NOT NULL,
-    thoi_gian_dang_ky TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    thoi_gian_dang_ky TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     trang_thai ENUM('da_dang_ky', 'da_huy', 'da_tham_gia')
         NOT NULL DEFAULT 'da_dang_ky',
+
     UNIQUE (su_kien_id, nguoi_dung_id),
+    INDEX idx_dang_ky_nguoi_dung (nguoi_dung_id),
+
     FOREIGN KEY (su_kien_id)
         REFERENCES su_kien(id),
+
     FOREIGN KEY (nguoi_dung_id)
         REFERENCES nguoi_dung(id)
 );
@@ -86,3 +99,21 @@ CREATE TABLE thong_bao (
         REFERENCES su_kien(id)
         ON DELETE SET NULL
 );
+
+-- 6. Ghi nho dang nhap
+CREATE TABLE ghi_nho_dang_nhap (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nguoi_dung_id INT NOT NULL,
+    selector CHAR(32) NOT NULL UNIQUE,
+    token_hash CHAR(64) NOT NULL,
+    het_han DATETIME NOT NULL,
+    ngay_tao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_ghi_nho_nguoi_dung (nguoi_dung_id),
+
+    FOREIGN KEY (nguoi_dung_id)
+        REFERENCES nguoi_dung(id)
+        ON DELETE CASCADE
+);
+
+
