@@ -148,18 +148,82 @@ Trường dữ liệu và quy tắc kiểm tra
 
 - **Thư mục lưu ảnh:** `docs/minh_chung_nguoi_3`.
 
-### 2.8. Biểu mẫu và quy tắc của các thành viên khác
+### 2.8. Biểu mẫu và quy tắc quản lý câu lạc bộ, tài khoản Admin
 
+**Thành viên phụ trách:** Nguyễn Phương Anh
 
-**Nguyễn Phương Anh**
+**Biểu mẫu/màn hình:**
 
-- Biểu mẫu/màn hình:
-- Các trường dữ liệu:
-- Quy tắc quản lý câu lạc bộ:
-- Quy tắc quản lý tài khoản và vai trò:
-- Quy tắc phân quyền:
-- Route:
-- Minh chứng:
+- Dashboard Admin: màn hình tổng quan dành cho quản trị viên.
+- Màn hình danh sách câu lạc bộ: hiển thị các câu lạc bộ hiện có trong hệ thống.
+- Biểu mẫu thêm câu lạc bộ: nhập thông tin để tạo câu lạc bộ mới.
+- Biểu mẫu sửa câu lạc bộ: cập nhật thông tin của câu lạc bộ đã tồn tại.
+- Màn hình danh sách tài khoản: hiển thị danh sách tài khoản trong hệ thống.
+- Các chức năng cập nhật tài khoản và vai trò cần được đối chiếu với mã nguồn và kiểm thử trước khi xác nhận hoàn thành.
+
+**Các trường dữ liệu:**
+
+| Nhóm dữ liệu | Trường dữ liệu | Quy tắc kiểm tra |
+|---|---|---|
+| Câu lạc bộ | Mã câu lạc bộ | Do hệ thống quản lý; cần bảo đảm tính duy nhất |
+| Câu lạc bộ | Tên câu lạc bộ | Bắt buộc nhập; kiểm tra độ dài và dữ liệu đầu vào |
+| Câu lạc bộ | Mô tả | Có thể để trống nếu nghiệp vụ cho phép |
+| Câu lạc bộ | Mã người quản lý | Không bắt buộc nếu nghiệp vụ cho phép; nếu nhập phải kiểm tra người quản lý có tồn tại và hợp lệ |
+| Tài khoản | Mã tài khoản | Do hệ thống quản lý; xác định đúng tài khoản cần thao tác |
+| Tài khoản | Thông tin tài khoản | Kiểm tra các trường theo biểu mẫu và cấu trúc cơ sở dữ liệu thực tế |
+| Tài khoản | Vai trò | Chỉ chấp nhận các vai trò được hệ thống quy định |
+
+**Quy tắc quản lý câu lạc bộ:**
+
+- Kiểm tra tên câu lạc bộ không được để trống trước khi thêm hoặc cập nhật.
+- Kiểm tra mã người quản lý nếu được nhập; không chấp nhận mã không tồn tại hoặc không hợp lệ.
+- Kiểm tra câu lạc bộ có tồn tại trước khi thực hiện cập nhật hoặc xóa.
+- Sử dụng câu lệnh SQL có tham số để hạn chế nguy cơ SQL Injection.
+- Thực hiện thao tác xóa bằng phương thức POST, không xóa dữ liệu chỉ bằng cách truy cập đường dẫn GET.
+- Xử lý trường hợp không thể xóa câu lạc bộ do bị ràng buộc khóa ngoại; thông báo rõ kết quả cho người dùng.
+- Hiển thị thông báo phù hợp sau khi thêm, sửa hoặc xóa thành công hay thất bại.
+- Kiểm tra dữ liệu ở phía máy chủ, không chỉ dựa vào validation trên giao diện.
+
+**Quy tắc quản lý tài khoản và vai trò:**
+
+- Sử dụng trang `tai_khoan.php` và Controller `QuanLyTaiKhoanController.php` để đối chiếu các chức năng quản lý tài khoản.
+- Kiểm tra tài khoản có tồn tại trước khi thực hiện thao tác cập nhật.
+- Kiểm tra vai trò được chọn có thuộc danh sách vai trò hợp lệ của hệ thống hay không.
+- Chỉ cho phép cập nhật thông tin và vai trò theo đúng quyền được cấp.
+- Kiểm tra kết quả cập nhật và hiển thị thông báo phù hợp.
+- Các thao tác cụ thể về cập nhật tài khoản và vai trò cần được kiểm tra trong mã nguồn và kiểm thử thực tế trước khi ghi nhận hoàn thành.
+
+**Quy tắc phân quyền:**
+
+- Các trang và chức năng quản trị phải giới hạn cho tài khoản có quyền Admin.
+- Kiểm tra quyền truy cập ở phía máy chủ trước khi thực hiện thao tác quản trị.
+- Không chỉ ẩn nút hoặc đường dẫn trên giao diện để thay thế cho việc kiểm tra quyền.
+- Không cho phép người dùng tự ý thay đổi vai trò hoặc thực hiện chức năng vượt quá quyền được cấp.
+- Cần kiểm thử cả trường hợp Admin truy cập hợp lệ và tài khoản không có quyền Admin cố truy cập trực tiếp vào route quản trị.
+
+**Route:**
+
+Các route dự kiến theo cấu trúc `page` được xác định trong phần thiết kế. Cần đối chiếu với `public/index.php` để xác nhận đường dẫn thực tế của dự án.
+
+| Phương thức | Route dự kiến | Chức năng |
+|---|---|---|
+| GET | `/?page=dashboard` | Hiển thị Dashboard Admin |
+| GET | `/?page=cau-lac-bo` | Hiển thị danh sách câu lạc bộ |
+| GET/POST | `/?page=them-cau-lac-bo` | Hiển thị biểu mẫu và xử lý thêm câu lạc bộ |
+| GET | `/?page=sua-cau-lac-bo&id={id}` | Hiển thị biểu mẫu sửa câu lạc bộ |
+| POST | `/?page=sua-cau-lac-bo&id={id}` | Xử lý cập nhật câu lạc bộ |
+| POST | `/?page=xoa-cau-lac-bo` | Xử lý xóa câu lạc bộ |
+| GET | `/?page=tai-khoan` | Hiển thị danh sách tài khoản |
+
+**Minh chứng:**
+
+- Controller quản lý Admin: `app/Controllers/QuanLyAdminController.php`.
+- Controller quản lý tài khoản: `app/Controllers/QuanLyTaiKhoanController.php`.
+- Model câu lạc bộ: `app/Models/CauLacBo.php`.
+- Các View quản trị tương ứng trong `app/Views/admin/`.
+- Ảnh chụp Dashboard Admin, danh sách câu lạc bộ, biểu mẫu thêm/sửa câu lạc bộ và danh sách tài khoản.
+- Kết quả kiểm thử validation, phân quyền, thao tác xóa và trường hợp bị ràng buộc khóa ngoại.
+- Lịch sử commit trên nhánh `feature/admin-clubs-users`.
 
 ### 2.9. Biểu mẫu và quy tắc quản lý sự kiện toàn hệ thống
 
@@ -269,11 +333,13 @@ Các route dưới đây được xác định theo tên `action` trong `public/
 
 ### 4.4. Nguyễn Phương Anh
 
-- Dashboard Admin:
-- Màn hình quản lý câu lạc bộ:
-- Màn hình quản lý tài khoản:
-- Màn hình phân quyền:
-- Vị trí lưu ảnh/tài liệu minh chứng:
+- Dashboard Admin:`app/Views/admin/dashboard.php`
+- Màn hình quản lý câu lạc bộ:`app/Views/admin/cau_lac_bo.php`
+- Màn hình quản lý tài khoản:`app/Views/admin/tai_khoan.php`
+- Form thêm câu lạc bộ: `app/Views/admin/them_cau_lac_bo.php`
+- Form sửa câu lạc bộ: `app/Views/admin/sua_cau_lac_bo.php`
+- Controller: `app/Controllers/QuanLyAdminController.php` và `app/Controllers/QuanLyTaiKhoanController.php`; Model câu lạc bộ: `app/Models/CauLacBo.php`
+- Vị trí lưu ảnh/tài liệu minh chứng:bổ sung đường dẫn ảnh chụp giao diện sau khi lưu ảnh vào thư mục minh chứng của nhóm.
 
 ### 4.5. Bùi Mai Phương
 
@@ -326,10 +392,13 @@ Mỗi thành viên bổ sung các route thực tế do mình phụ trách sau kh
 
 | Phương thức | Route | Chức năng | Kết quả kiểm tra |
 |---|---|---|---|
-|  |  | Danh sách câu lạc bộ |  |
-|  |  | Thêm, sửa, xóa câu lạc bộ |  |
-|  |  | Danh sách tài khoản |  |
-|  |  | Quản lý tài khoản và vai trò |  |
+| GET | `/?page=dashboard` | Dashboard Admin, hiển thị tổng số câu lạc bộ, tài khoản và sự kiện | Đã mở được trang; cần đối chiếu số liệu khi có dữ liệu mẫu |
+| GET | `/?page=cau-lac-bo` | Danh sách câu lạc bộ | Đạt |
+| GET/POST | `/?page=them-cau-lac-bo` | Hiển thị form và xử lý thêm câu lạc bộ | Đã triển khai; kiểm thử thêm để ghi nhận đầy đủ |
+| GET/POST | `/?page=sua-cau-lac-bo&id={id}` | Hiển thị form và cập nhật câu lạc bộ | Đạt theo kiểm tra giao diện |
+| POST | `/?page=xoa-cau-lac-bo` | Xóa câu lạc bộ, xử lý lỗi ID và ràng buộc khóa ngoại | Xóa thành công đã kiểm tra; trường hợp bị khóa ngoại chưa kiểm thử trực tiếp |
+| GET | `/?page=tai-khoan` | Danh sách tài khoản | Có route/view trong dự án; cần kiểm thử thực tế |
+| — | Chưa triển khai/được xác nhận | Cập nhật tài khoản và vai trò | Chưa có thao tác cập nhật tài khoản hoặc vai trò trong controller đã đối chiếu |
 
 ### 5.5. Bùi Mai Phương
 
@@ -362,9 +431,9 @@ Mỗi thành viên bổ sung các route thực tế do mình phụ trách sau kh
 | 13 | SV3 | Đăng ký trùng sự kiện | Từ chối đăng ký trùng | Đạt |  |
 | 14 | SV3 | Hủy đăng ký hợp lệ | Đăng ký được hủy | Đạt |  |
 | 15 | SV3 | Đăng ký khi hết chỗ/đã đóng | Từ chối đăng ký | Đạt |  |
-| 16 | SV4 | Quản lý câu lạc bộ | Thao tác đúng quyền |  |  |
-| 17 | SV4 | Quản lý tài khoản | Dữ liệu được xử lý đúng |  |  |
-| 18 | SV4 | Truy cập chức năng Admin bằng tài khoản thường | Từ chối truy cập |  |  |
+| 16 | SV4 | Quản lý câu lạc bộ | Thao tác đúng quyền | Đạt |  |
+| 17 | SV4 | Quản lý tài khoản | Dữ liệu được xử lý đúng | Chưa kiểm thử |  |
+| 18 | SV4 | Truy cập chức năng Admin bằng tài khoản thường | Từ chối truy cập | Chưa kiểm thử |  |
 | 19 | SV5 – Bùi Mai Phương | Xem Dashboard Admin | Hiển thị đúng dữ liệu tổng quan | Chưa kiểm thử | |
 | 20 | SV5 – Bùi Mai Phương | Xem danh sách sự kiện toàn hệ thống | Danh sách khớp với cơ sở dữ liệu | Chưa kiểm thử | |
 | 21 | SV5 – Bùi Mai Phương | Thêm và cập nhật sự kiện | Dữ liệu được lưu chính xác | Chưa kiểm thử | |
@@ -405,12 +474,12 @@ Mỗi thành viên bổ sung các route thực tế do mình phụ trách sau kh
 
 ### 7.4. Nguyễn Phương Anh
 
-- Nhánh Git:
-- Commit:
-- Pull Request:
-- Ảnh giao diện:
-- Kết quả kiểm thử:
-- Ghi chú tích hợp:
+- **Nhánh Git dự kiến theo phân công:** `feature/admin-clubs-users`.
+- **Commit:** Chưa cung cấp mã commit; bổ sung sau khi kiểm tra lịch sử Git.
+- **Pull Request:** Chưa cung cấp liên kết.
+- **Ảnh giao diện:** Bổ sung ảnh Dashboard Admin, danh sách câu lạc bộ, form thêm/sửa và trang tài khoản sau khi lưu vào thư mục minh chứng.
+- **Kết quả kiểm thử:** Đã kiểm tra thao tác xóa câu lạc bộ thành công và giao diện hiển thị thông báo “Xóa câu lạc bộ thành công!”. Chưa có kết quả kiểm thử xác nhận cho trường hợp xóa bị ràng buộc khóa ngoại, danh sách tài khoản và phân quyền Admin.
+- **Ghi chú tích hợp:** Kiểm tra trạng thái nhánh, commit và Pull Request thực tế trước khi nộp; không ghi nhận các mục chưa xác minh là hoàn thành.
 
 ### 7.5. Bùi Mai Phương
 
@@ -475,11 +544,11 @@ Các thông số cần cấu hình:
 
 ### 9.1. Kết quả đã hoàn thành
 
-- SV1:
-- SV2:
-- SV3:
-- SV4:
-- SV5:
+- SV1: Xây dựng form thêm/sửa sự kiện và kiểm tra dữ liệu theo phần minh chứng đã ghi trong README.
+- SV2: Cần cập nhật kết quả thực tế của chức năng danh sách, chi tiết, tìm kiếm và lọc sự kiện.
+- SV3: Cần cập nhật kết quả thực tế của chức năng đăng ký, hủy đăng ký và Fetch API.
+- SV4: Đã xây dựng các màn hình Dashboard Admin, danh sách câu lạc bộ, form thêm/sửa câu lạc bộ và danh sách tài khoản; đã kiểm tra thao tác xóa câu lạc bộ thành công. Controller tài khoản hiện mới có chức năng lấy và hiển thị danh sách; cập nhật tài khoản/vai trò, xác minh phân quyền Admin và kiểm thử tình huống xóa bị ràng buộc khóa ngoại còn cần hoàn thiện hoặc xác nhận thêm.
+- SV5: Cần cập nhật kết quả thực tế của chức năng quản lý sự kiện Admin và thống kê.
 
 ### 9.2. Kết quả tích hợp toàn hệ thống
 
