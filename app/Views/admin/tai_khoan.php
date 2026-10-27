@@ -32,60 +32,142 @@ $tongTrang = $tongTrang ?? 1;
     <title>Quản lý tài khoản Ban tổ chức</title>
     
 <style>
+
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    padding: 0;
     font-family: Arial, sans-serif;
+    color: #263b34;
+    background: #f5f6f2;
     line-height: 1.5;
 }
-
 .app-layout {
     display: grid;
-    grid-template-columns: 245px minmax(0, 1fr);
+    grid-template-columns: 230px minmax(0, 1fr);
     min-height: 100vh;
 }
 
 .thanh-ben {
-    min-width: 0;
-    padding: 24px 16px;
-    border-right: 1px solid;
+    box-sizing: border-box;
+    width: 230px;
+    min-width: 230px;
+    min-height: 100vh;
+    padding: 22px 14px;
+    margin: 0;
+    background: #075747;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.thuong-hieu {
+    box-sizing: border-box;
+    height: 26px;
+    margin: 0 8px 28px;
+    color: #fff;
+    font-size: 17px;
+    line-height: 26px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .menu-ben {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .menu-ben a {
+    box-sizing: border-box;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px 12px;
+    gap: 10px;
+    width: 100%;
+    height: 45px;
+    min-height: 45px;
+    margin: 0;
+    padding: 0 12px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #f5faf6;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
     text-decoration: none;
-    border-radius: 8px;
+    white-space: nowrap;
+    transition: background .2s;
+}
+
+.menu-ben a:hover {
+    background: #106d5a;
 }
 
 .menu-ben a.dang-chon {
-    border: 1px solid;
-    font-weight: bold;
+    background: #13866f;
+    color: #fff;
+    font-weight: 600;
 }
 
+.menu-icon {
+    display: inline-flex;
+    flex: 0 0 16px;
+    width: 16px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    line-height: 20px;
+}
+.noi-dung-chinh {
+    box-sizing: border-box;
+    min-width: 0;
+}
+@media (max-width: 600px) {
+    .app-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .thanh-ben {
+        width: 100%;
+        min-width: 0;
+        min-height: auto;
+        padding: 14px;
+    }
+
+    .thuong-hieu {
+        height: 26px;
+        margin: 0 4px 12px;
+        line-height: 26px;
+    }
+
+    .menu-ben {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .menu-ben a {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+        height: 40px;
+        min-height: 40px;
+        padding: 0 9px;
+        font-size: 12px;
+        white-space: normal;
+    }
+}
 .noi-dung-chinh {
     min-width: 0;
-    padding: 28px 32px;
-}
-
-h1 {
-    margin: 0 0 8px;
-}
-
-h2 {
-    margin: 24px 0 12px;
+    padding: 30px 28px;
+    background: #f5f6f2;
 }
 
 .page-intro {
@@ -94,115 +176,195 @@ h2 {
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
 
+.page-intro h1 {
+    margin: 0 0 8px;
+    color: #174b3d;
+    font-size: 28px;
+}
+
+.page-intro p {
+    margin: 0;
+    color: #68766f;
+    font-size: 14px;
+}
+
+h2 {
+    margin: 24px 0 12px;
+    color: #234c3e;
+    font-size: 19px;
+}
+
+/* Nút */
+button {
+    min-height: 40px;
+    padding: 9px 14px;
+    border: 1px solid #d8dfd8;
+    border-radius: 7px;
+    background: #fff;
+    color: #28483d;
+    font: inherit;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+button:hover {
+    background: #edf3ed;
+}
+
+button.primary,
+button[type="submit"].primary {
+    border-color: #075747;
+    background: #075747;
+    color: #fff;
+}
+
+button.primary:hover,
+button[type="submit"].primary:hover {
+    background: #0b6c57;
+}
 .summary {
     display: flex;
-    gap: 24px;
     flex-wrap: wrap;
+    gap: 12px;
     margin: 18px 0;
 }
 
 .summary p {
     margin: 0;
+    padding: 12px 16px;
+    border: 1px solid #e0e5dc;
+    border-radius: 9px;
+    background: #fffdf7;
+    font-size: 14px;
 }
-
-button,
-input,
-select {
-    font: inherit;
-}
-
-button {
-    padding: 10px 14px;
-    border: 1px solid;
-    border-radius: 7px;
-    cursor: pointer;
-}
-
-input,
-select {
-    width: 100%;
-    min-height: 40px;
-    padding: 9px 10px;
-    border: 1px solid;
-    border-radius: 7px;
-}
-
-label {
-    display: block;
-    font-weight: 600;
-}
-
-label input,
-label select {
-    margin-top: 6px;
-    font-weight: normal;
-}
-
 .filter-form {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
     align-items: end;
-    gap: 12px;
-    padding: 16px;
-    margin: 16px 0 22px;
-    border: 1px solid;
+    gap: 14px;
+    margin: 18px 0 24px;
+    padding: 18px;
+    border: 1px solid #e0e4db;
     border-radius: 10px;
+    background: #fffdf8;
 }
 
+label {
+    display: block;
+    color: #344b40;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+input,
+select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    margin-top: 6px;
+    padding: 9px 11px;
+    border: 1px solid #d2dbd2;
+    border-radius: 7px;
+    background: #fff;
+    color: #263b34;
+    font: inherit;
+}
+
+input:focus,
+select:focus {
+    outline: 2px solid #a9d4c1;
+    border-color: #23856d;
+}
 .table-wrap {
     width: 100%;
     overflow-x: auto;
+    border: 1px solid #e0e4db;
+    border-radius: 10px;
+    background: #fffdf8;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    margin: 0;
 }
 
 th,
 td {
-    padding: 12px;
-    border: 1px solid;
+    padding: 13px 12px;
+    border-bottom: 1px solid #e4e8e0;
     text-align: left;
     vertical-align: middle;
+    overflow-wrap: anywhere;
 }
 
 th {
+    background: #e8f0e8;
+    color: #244b3d;
+    font-size: 13px;
+    font-weight: 700;
     white-space: nowrap;
+}
+
+tbody tr:nth-child(even) {
+    background: #f8f8f2;
+}
+
+tbody tr:hover {
+    background: #eef4eb;
+}
+
+tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+td {
+    font-size: 14px;
 }
 
 .actions {
     display: flex;
-    gap: 8px;
     flex-wrap: wrap;
-}
-
-.message {
-    padding: 12px 14px;
-    border: 1px solid;
-    border-radius: 8px;
-    margin: 12px 0;
+    gap: 8px;
 }
 
 .empty {
+    padding: 28px;
     text-align: center;
-    padding: 24px;
+    color: #68766f;
 }
 
+/* Thông báo */
+.message {
+    margin: 12px 0;
+    padding: 12px 15px;
+    border: 1px solid #cbded0;
+    border-radius: 8px;
+    background: #edf5eb;
+    color: #245b43;
+}
+
+/* Cửa sổ tạo và sửa tài khoản */
 dialog {
-    width: min(620px, calc(100% - 28px));
-    max-height: 90vh;
+    width: min(600px, calc(100% - 28px));
+    max-height: 88vh;
     overflow-y: auto;
-    border: 1px solid;
-    border-radius: 12px;
     padding: 24px;
+    border: 1px solid #dce3d9;
+    border-radius: 13px;
+    background: #fffdf8;
+    color: #263b34;
+}
+
+dialog::backdrop {
+    background: rgba(13, 43, 33, .48);
 }
 
 dialog h2 {
-    margin-top: 0;
+    margin: 0 0 16px;
 }
 
 .dialog-form {
@@ -212,31 +374,63 @@ dialog h2 {
 
 .dialog-actions {
     display: flex;
-    gap: 10px;
     justify-content: flex-end;
     flex-wrap: wrap;
+    gap: 10px;
     margin-top: 8px;
 }
 
 .muted {
-    font-size: 0.92rem;
+    color: #68766f;
+    font-size: 13px;
 }
 
 .pagination {
     display: flex;
-    gap: 14px;
+    justify-content: center;
     align-items: center;
-    justify-content: flex-end;
-    margin-top: 18px;
+    gap: 18px;
+    margin-top: 22px;
 }
 
-@media (max-width: 800px) {
+.pagination a {
+    color: #08644f;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.pagination a:hover {
+    text-decoration: underline;
+}
+@media (max-width: 1000px) {
+    .app-layout {
+        grid-template-columns: 195px minmax(0, 1fr);
+    }
+
+    .noi-dung-chinh {
+        padding: 22px 18px;
+    }
+
+    .filter-form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .filter-form button {
+        grid-column: 1 / -1;
+    }
+}
+@media (max-width: 700px) {
     .app-layout {
         grid-template-columns: 1fr;
     }
 
     .thanh-ben {
-        padding: 12px;
+        min-height: auto;
+        padding: 14px;
+    }
+
+    .thuong-hieu {
+        margin-bottom: 12px;
     }
 
     .menu-ben {
@@ -245,65 +439,68 @@ dialog h2 {
     }
 
     .menu-ben a {
-        padding: 10px;
+        flex: 1 1 auto;
     }
 
     .noi-dung-chinh {
-        padding: 16px;
+        padding: 18px 12px;
     }
 
     .filter-form {
         grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .filter-form button {
+        grid-column: auto;
     }
 
     .table-wrap table {
-        min-width: 750px;
+        min-width: 700px;
+    }
+
+    .page-intro h1 {
+        font-size: 24px;
     }
 }
 </style>
-
 </head>
 <body>
 <div class="app-layout">
-
-    <aside class="thanh-ben">
-<nav class="menu-ben">
-    <a href="?action=quan-ly-su-kien">
-        <span>▦</span> Quản lý sự kiện
-    </a>
-
-    <a class="dang-chon" href="?action=quan-ly-tai-khoan">
-        <span>♙</span> Quản lý ban tổ chức
-    </a>
-
-    <a href="?action=thong-ke">
-        <span>▤</span> Thống kê
-    </a>
-</nav>
-
-    </aside>
-
+<aside class="thanh-ben">
+    <div class="thuong-hieu">Sự kiện sinh viên</div>
+    <nav class="menu-ben" aria-label="Điều hướng">
+        <a href="?action=quan-ly-su-kien">
+            <span class="menu-icon">▦</span>
+            <span>Quản lý sự kiện</span>
+        </a>
+        <a class="dang-chon" href="?action=quan-ly-tai-khoan">
+            <span class="menu-icon">♙</span>
+            <span>Quản lý Ban tổ chức</span>
+        </a>
+        <a href="?action=thong-ke">
+            <span class="menu-icon">▤</span>
+            <span>Thống kê</span>
+        </a>
+    </nav>
+</aside>
 <main class="noi-dung-chinh">
     <div class="page-intro">
         <div>
             <h1>Quản lý ban tổ chức</h1>
             <p>Quản lý tài khoản đăng nhập và câu lạc bộ phụ trách.</p>
         </div>
-
         <button type="button" class="primary" id="moFormTaoTaiKhoan">
             + Tạo tài khoản ban tổ chức
         </button>
     </div>
-
     <?php if (isset($noiDungThongBao[$thongBao])): ?>
         <p class="message" role="status"><?= $e($noiDungThongBao[$thongBao]) ?></p>
     <?php endif; ?>
-
     <div class="summary">
         <p>Tổng tài khoản ban tổ chức: <strong><?= (int) $tongTaiKhoan ?></strong></p>
         <p>Kết quả tìm được: <strong><?= (int) $tongKetQua ?></strong></p>
     </div>
-
     <form class="filter-form" method="get" action="">
         <input type="hidden" name="action" value="quan-ly-tai-khoan">
         <label>Tìm theo họ tên hoặc email
@@ -321,7 +518,6 @@ dialog h2 {
         </label>
         <button type="submit" class="primary">Tìm kiếm</button>
     </form>
-
     <h2>Danh sách tài khoản</h2>
     <div class="table-wrap">
         <table>
@@ -389,7 +585,6 @@ dialog h2 {
             </tbody>
         </table>
     </div>
-
     <nav class="pagination" aria-label="Phân trang tài khoản">
         <?php
         $thamSoTrang = ['action' => 'quan-ly-tai-khoan', 'q' => $tuKhoa, 'cau_lac_bo_id' => $cauLacBoId];
@@ -402,7 +597,6 @@ dialog h2 {
             <a href="?<?= $e(http_build_query($thamSoTrang)) ?>">Trang sau</a>
         <?php endif; ?>
     </nav>
-
     <dialog id="formTaoTaiKhoan">
         <h2>Tạo tài khoản Ban tổ chức</h2>
         <form class="dialog-form" method="post" action="?action=them-tai-khoan">
