@@ -628,23 +628,19 @@ Giao diện View không thực hiện truy vấn SQL trực tiếp.
 | TC04 | Hủy đăng ký quá hạn 24 giờ | Từ chối hủy và hiển thị thông báo | PASS |
 | TC05 | Xóa đăng ký đã hủy | Xóa thành công, không còn trong danh sách | PASS |
 
-### 6. Ảnh màn hình minh chứng
+## 6. Ảnh màn hình minh chứng
 
-#### 6.1. Giao diện danh sách Đăng ký của tôi
+### 6.1. Giao diện danh sách Đăng ký của tôi
+![Giao diện Đăng ký của tôi](images/dang-ky-cua-toi.png)
 
-![Giao diện Đăng ký của tôi](docs/images/dang-ky-cua-toi.png)
+### 6.2. Kiểm tra đăng ký trùng
+![Thông báo đăng ký trùng](images/dang-ky-trung.png)
 
-#### 6.2. Kiểm tra đăng ký trùng
+### 6.3. Hủy đăng ký thành công
+![Hủy đăng ký thành công](images/huy-dang-ky.png)
 
-![Thông báo đăng ký trùng](docs/images/dang-ky-trung.png)
-
-#### 6.3. Hủy đăng ký thành công
-
-![Hủy đăng ký thành công](docs/images/huy-dang-ky.png)
-
-#### 6.4. Xóa đăng ký đã hủy
-
-![Xóa đăng ký đã hủy](docs/images/xoa-dang-ky.png)
+### 6.4. Xóa đăng ký đã hủy
+![Xóa đăng ký đã hủy](images/xoa-dang-ky.png)
 
 ### 7. Kết quả thực hiện
 
