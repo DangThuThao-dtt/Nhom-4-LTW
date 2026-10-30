@@ -1,62 +1,100 @@
 
 <?php
-// Du lieu thong ke se duoc Controller truyen vao.
 $tongCauLacBo = $tongCauLacBo ?? 0;
 $tongTaiKhoan = $tongTaiKhoan ?? 0;
 $tongSuKien = $tongSuKien ?? 0;
-?>
 
+$duongDanGoc = '/Nhom-4-LTW/public';
+$trangHienTai = 'dashboard';
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard Admin - Nhóm 4</title>
 
     <style>
-        * {
-            box-sizing: border-box;
+        :root {
+            --trang: #FFFFFF;
+            --nen: #F5F1E5;
+            --xanh-chinh: #0B4D3E;
+            --xanh-phu: #176653;
+            --vien: #E9E2D2;
+            --chu: #174F42;
+            --chu-phu: #64766E;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f3f5f9;
-            color: #243247;
+            background: var(--nen);
+            color: var(--chu);
         }
 
         .sidebar {
             position: fixed;
             inset: 0 auto 0 0;
-            width: 235px;
+            width: 250px;
             padding: 28px 18px;
-            background: #172b4d;
-            color: white;
+            background: var(--xanh-chinh);
+            color: var(--trang);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
         }
 
         .brand {
             font-size: 20px;
             font-weight: bold;
+            line-height: 1.5;
             margin-bottom: 35px;
+            padding: 0 10px;
+        }
+
+        .brand span {
+            display: block;
+            margin-top: 5px;
+            color: var(--vien);
+            font-size: 11px;
+            letter-spacing: 1px;
         }
 
         .menu a {
-            display: block;
-            color: #e2e8f0;
-            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             padding: 13px;
             margin-bottom: 8px;
-            border-radius: 7px;
+            border-radius: 8px;
+            color: var(--trang);
+            text-decoration: none;
+            transition: background .2s;
         }
 
         .menu a:hover,
         .menu a.active {
-            background: #2f5597;
-            color: white;
+            background: var(--xanh-phu);
+        }
+
+        .menu-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 25px 10px 0;
+            color: var(--vien);
+            font-size: 10px;
+            line-height: 1.6;
         }
 
         .main {
-            margin-left: 235px;
+            margin-left: 250px;
             padding: 32px;
         }
 
@@ -64,16 +102,19 @@ $tongSuKien = $tongSuKien ?? 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
             gap: 15px;
             margin-bottom: 28px;
         }
 
         .header h1 {
             margin: 0 0 8px;
+            color: var(--xanh-chinh);
         }
 
         .muted {
-            color: #718096;
+            color: var(--chu-phu);
+            line-height: 1.6;
         }
 
         .cards {
@@ -83,34 +124,37 @@ $tongSuKien = $tongSuKien ?? 0;
         }
 
         .card {
-            background: white;
             padding: 24px;
+            background: var(--trang);
+            border: 1px solid var(--vien);
             border-radius: 12px;
-            box-shadow: 0 3px 12px #0000000a;
+            box-shadow: 0 3px 12px #174F4208;
         }
 
         .card h3 {
             margin-top: 0;
-            color: #64748b;
+            color: var(--xanh-chinh);
             font-size: 15px;
         }
 
         .number {
+            margin: 12px 0;
+            color: var(--xanh-phu);
             font-size: 32px;
             font-weight: bold;
-            margin: 12px 0;
-            color: #2457a7;
         }
 
         .section {
             margin-top: 25px;
-            background: white;
-            border-radius: 12px;
             padding: 24px;
+            background: var(--trang);
+            border: 1px solid var(--vien);
+            border-radius: 12px;
         }
 
         .section h2 {
             margin-top: 0;
+            color: var(--xanh-chinh);
         }
 
         .actions {
@@ -122,62 +166,57 @@ $tongSuKien = $tongSuKien ?? 0;
         .btn {
             display: inline-block;
             padding: 12px 16px;
-            background: #2457a7;
-            color: white;
-            text-decoration: none;
             border-radius: 7px;
+            background: var(--xanh-chinh);
+            color: var(--trang);
+            text-decoration: none;
+            transition: background .2s;
         }
 
+        .btn:hover { background: var(--xanh-phu); }
+
         .btn.secondary {
-            background: #e8eef8;
-            color: #2457a7;
+            background: var(--nen);
+            border: 1px solid var(--vien);
+            color: var(--xanh-chinh);
+        }
+
+        .btn.secondary:hover { background: var(--vien); }
+
+        @media (max-width: 1000px) {
+            .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
         @media (max-width: 760px) {
             .sidebar {
-                position: static;
+                position: relative;
                 width: 100%;
+                padding: 18px;
             }
+
+            .brand { margin-bottom: 18px; }
+
+            .menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .menu a { margin-bottom: 0; }
+
+            .sidebar-footer { margin-top: 18px; }
 
             .main {
                 margin-left: 0;
                 padding: 18px;
             }
 
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                align-items: flex-start;
-                flex-direction: column;
-            }
+            .cards { grid-template-columns: 1fr; }
         }
     </style>
 </head>
-
 <body>
-    <aside class="sidebar">
-        <div class="brand">NHÓM 4 - ADMIN</div>
-
-        <nav class="menu">
-            <a class="active" href="index.php?page=dashboard">
-                Dashboard
-            </a>
-
-            <a href="index.php?page=cau-lac-bo">
-                Quản lý câu lạc bộ
-            </a>
-
-            <a href="index.php?page=tai-khoan">
-                Quản lý tài khoản
-            </a>
-
-            <a href="../dang_nhap.php">
-                Đăng nhập
-            </a>
-        </nav>
-    </aside>
+    <?php require __DIR__ . '/partials/menu.php'; ?>
 
     <main class="main">
         <header class="header">
@@ -187,57 +226,41 @@ $tongSuKien = $tongSuKien ?? 0;
                     Hệ thống quản lý sự kiện sinh viên
                 </div>
             </div>
-
             <strong>Quản trị hệ thống</strong>
         </header>
 
         <section class="cards">
             <article class="card">
                 <h3>Tổng câu lạc bộ</h3>
-                <div class="number">
-                    <?= (int) $tongCauLacBo ?>
-                </div>
-                <div class="muted">
-                    Số câu lạc bộ trong hệ thống
-                </div>
+                <div class="number"><?= (int) $tongCauLacBo ?></div>
+                <div class="muted">Số câu lạc bộ trong hệ thống</div>
             </article>
 
             <article class="card">
                 <h3>Tổng tài khoản</h3>
-                <div class="number">
-                    <?= (int) $tongTaiKhoan ?>
-                </div>
-                <div class="muted">
-                    Tài khoản thành viên đã đăng ký
-                </div>
+                <div class="number"><?= (int) $tongTaiKhoan ?></div>
+                <div class="muted">Tài khoản thành viên trong hệ thống</div>
             </article>
 
             <article class="card">
                 <h3>Tổng sự kiện</h3>
-                <div class="number">
-                    <?= (int) $tongSuKien ?>
-                </div>
-                <div class="muted">
-                    Số sự kiện toàn hệ thống
-                </div>
+                <div class="number"><?= (int) $tongSuKien ?></div>
+                <div class="muted">Số sự kiện toàn hệ thống</div>
             </article>
         </section>
 
         <section class="section">
             <h2>Chức năng quản trị</h2>
-
-            <p class="muted">
-                Chọn chức năng bạn muốn quản lý.
-            </p>
+            <p class="muted">Chọn chức năng bạn muốn quản lý.</p>
 
             <div class="actions">
                 <a class="btn"
-                   href="index.php?page=cau-lac-bo">
+                   href="<?= $duongDanGoc ?>/?page=cau-lac-bo">
                     Quản lý câu lạc bộ
                 </a>
 
                 <a class="btn secondary"
-                   href="index.php?page=tai-khoan">
+                   href="<?= $duongDanGoc ?>/?page=tai-khoan">
                     Quản lý tài khoản
                 </a>
             </div>

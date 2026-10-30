@@ -10,7 +10,7 @@ class CauLacBo
         $this->pdo = $pdo;
     }
 
-    // Lay danh sach cau lac bo
+    // Lay danh sach cau lac bo theo ID tu be den lon
     public function layDanhSach(): array
     {
         $sql = "
@@ -24,7 +24,7 @@ class CauLacBo
             FROM cau_lac_bo clb
             LEFT JOIN nguoi_dung nd
                 ON clb.nguoi_quan_ly_id = nd.id
-            ORDER BY clb.id DESC
+            ORDER BY clb.id ASC
         ";
 
         $stmt = $this->pdo->query($sql);

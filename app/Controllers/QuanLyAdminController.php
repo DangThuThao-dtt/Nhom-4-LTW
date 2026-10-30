@@ -6,6 +6,9 @@ require_once __DIR__ . '/../Models/CauLacBo.php';
 
 class QuanLyAdminController
 {
+    // Đường dẫn gốc của dự án trên XAMPP
+    private const DUONG_DAN_GOC = '/Nhom-4-LTW/public';
+
     // Trang Dashboard Admin
     public function dashboard(): void
     {
@@ -23,7 +26,7 @@ class QuanLyAdminController
         require __DIR__ . '/../Views/admin/dashboard.php';
     }
 
-    // Danh sach cau lac bo
+    // Danh sách câu lạc bộ
     public function danhSachCauLacBo(): void
     {
         $model = new CauLacBo($GLOBALS['pdo']);
@@ -32,7 +35,7 @@ class QuanLyAdminController
         require __DIR__ . '/../Views/admin/cau_lac_bo.php';
     }
 
-    // Them cau lac bo
+    // Thêm câu lạc bộ
     public function themCauLacBo(): void
     {
         $model = new CauLacBo($GLOBALS['pdo']);
@@ -65,7 +68,10 @@ class QuanLyAdminController
                     );
 
                     if ($thanhCong) {
-                        header('Location: /?page=cau-lac-bo&them=thanh-cong');
+                        header(
+                            'Location: ' . self::DUONG_DAN_GOC
+                            . '/?page=cau-lac-bo&them=thanh-cong'
+                        );
                         exit;
                     }
 
@@ -80,7 +86,7 @@ class QuanLyAdminController
         require __DIR__ . '/../Views/admin/them_cau_lac_bo.php';
     }
 
-    // Sua thong tin cau lac bo
+    // Sửa thông tin câu lạc bộ
     public function suaCauLacBo(): void
     {
         $pdo = $GLOBALS['pdo'];
@@ -93,7 +99,7 @@ class QuanLyAdminController
             exit('ID câu lạc bộ không hợp lệ.');
         }
 
-        // Lay thong tin cau lac bo can sua
+        // Lấy thông tin câu lạc bộ cần sửa
         $stmt = $pdo->prepare(
             "SELECT id, ten_cau_lac_bo, mo_ta, nguoi_quan_ly_id
              FROM cau_lac_bo
@@ -112,7 +118,7 @@ class QuanLyAdminController
         $moTa = $clb['mo_ta'] ?? '';
         $nguoiQuanLyId = $clb['nguoi_quan_ly_id'] ?? '';
 
-        // Xu ly khi nguoi dung bam Luu thay doi
+        // Xử lý khi người dùng bấm Lưu thay đổi
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ten = trim($_POST['ten_cau_lac_bo'] ?? '');
             $moTa = trim($_POST['mo_ta'] ?? '');
@@ -137,7 +143,10 @@ class QuanLyAdminController
                     );
 
                     if ($thanhCong) {
-                        header('Location: /?page=cau-lac-bo&sua=thanh-cong');
+                        header(
+                            'Location: ' . self::DUONG_DAN_GOC
+                            . '/?page=cau-lac-bo&sua=thanh-cong'
+                        );
                         exit;
                     }
 
@@ -152,20 +161,23 @@ class QuanLyAdminController
         require __DIR__ . '/../Views/admin/sua_cau_lac_bo.php';
     }
 
-    // Xoa cau lac bo
+    // Xóa câu lạc bộ
     public function xoaCauLacBo(): void
     {
-        // Chi chap nhan yeu cau POST
+        // Chỉ chấp nhận yêu cầu POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             exit('Phương thức không được hỗ trợ.');
         }
 
-        // Lay ID cau lac bo tu form
+        // Lấy ID câu lạc bộ từ form
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 
         if (!$id || $id < 1) {
-            header('Location: /?page=cau-lac-bo&xoa=loi-id');
+            header(
+                'Location: ' . self::DUONG_DAN_GOC
+                . '/?page=cau-lac-bo&xoa=loi-id'
+            );
             exit;
         }
 
@@ -175,17 +187,26 @@ class QuanLyAdminController
             $thanhCong = $model->xoa($id);
 
             if ($thanhCong) {
-                header('Location: /?page=cau-lac-bo&xoa=thanh-cong');
+                header(
+                    'Location: ' . self::DUONG_DAN_GOC
+                    . '/?page=cau-lac-bo&xoa=thanh-cong'
+                );
                 exit;
             }
 
-            header('Location: /?page=cau-lac-bo&xoa=that-bai');
+            header(
+                'Location: ' . self::DUONG_DAN_GOC
+                . '/?page=cau-lac-bo&xoa=that-bai'
+            );
             exit;
         } catch (PDOException $e) {
-            // Ghi chi tiet loi vao log, khong hien loi SQL cho nguoi dung
+            // Ghi chi tiết lỗi vào log, không hiển thị lỗi SQL cho người dùng
             error_log($e->getMessage());
 
-            header('Location: /?page=cau-lac-bo&xoa=bi-rang-buoc');
+            header(
+                'Location: ' . self::DUONG_DAN_GOC
+                . '/?page=cau-lac-bo&xoa=bi-rang-buoc'
+            );
             exit;
         }
     }
