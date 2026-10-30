@@ -19,5 +19,14 @@ try {
     );
 } catch (PDOException $e) {
     error_log($e->getMessage());
-    exit('Khong the ket noi co so du lieu.');
+
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Không thể kết nối cơ sở dữ liệu. Vui lòng kiểm tra cấu hình.'
+    ], JSON_UNESCAPED_UNICODE);
+
+    exit;
 }

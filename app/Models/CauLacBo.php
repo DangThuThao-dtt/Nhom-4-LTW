@@ -10,13 +10,14 @@ class CauLacBo
         $this->pdo = $pdo;
     }
 
-    // Lay danh sach cau lac bo
-    public function layDanhSach(): array
+    // Lay danh sach cau lac bo, co ho tro tim kiem
+    public function layDanhSach(string $tuKhoa = ''): array
     {
         $sql = "
             SELECT
                 clb.id,
                 clb.ten_cau_lac_bo,
+                clb.hinh_anh,
                 clb.mo_ta,
                 clb.nguoi_quan_ly_id,
                 nd.ho_ten AS ten_nguoi_quan_ly,
@@ -24,10 +25,19 @@ class CauLacBo
             FROM cau_lac_bo clb
             LEFT JOIN nguoi_dung nd
                 ON clb.nguoi_quan_ly_id = nd.id
-            ORDER BY clb.id DESC
         ";
 
-        $stmt = $this->pdo->query($sql);
+        $params = [];
+
+        if ($tuKhoa !== '') {
+            $sql .= " WHERE clb.ten_cau_lac_bo LIKE :tu_khoa";
+            $params['tu_khoa'] = '%' . $tuKhoa . '%';
+        }
+
+        $sql .= " ORDER BY clb.id DESC";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
 
         return $stmt->fetchAll();
     }
