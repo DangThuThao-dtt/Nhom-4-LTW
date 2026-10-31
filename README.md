@@ -645,3 +645,33 @@ Giao diện View không thực hiện truy vấn SQL trực tiếp.
 ### 7. Kết quả thực hiện
 
 Chức năng Đăng ký của tôi đã thực hiện các thao tác CRUD và tìm kiếm, sử dụng PDO Prepared Statement, phân tách Model – View – Controller và kiểm thử các trường hợp hợp lệ, không hợp lệ.
+
+
+
+## Refactor chức năng Đăng ký của tôi theo mô hình Controller – Repository – View
+
+### 1. Mục tiêu
+Tổ chức lại mã nguồn chức năng **Đăng ký của tôi** theo hướng phân chia rõ trách nhiệm giữa Controller, Repository và View, giúp mã nguồn dễ quản lý, bảo trì và mở rộng.
+
+### 2. Cấu trúc trước khi refactor
+- **Model (`app/Models/dang_ky.php`):** Chứa các câu lệnh SQL để truy vấn và thao tác dữ liệu đăng ký.
+- **Controller (`app/Controllers/dang_ky_controller.php`):** Gọi Model để lấy dữ liệu và xử lý yêu cầu của người dùng.
+- **View (`app/Views/thanh_vien/dang_ky_cua_toi.php`):** Hiển thị danh sách đăng ký.
+
+### 3. Cấu trúc sau khi refactor
+- **Repository (`app/Repositories/DangKyRepository.php`):** Quản lý các thao tác truy vấn và cập nhật dữ liệu đăng ký bằng PDO.
+- **Controller (`app/Controllers/dang_ky_controller.php`):** Tiếp nhận yêu cầu, kiểm tra phiên đăng nhập, gọi Repository lấy dữ liệu và chuyển dữ liệu sang View.
+- **View (`app/Views/thanh_vien/dang_ky_cua_toi.php`):** Chịu trách nhiệm hiển thị danh sách đăng ký và kết quả tìm kiếm.
+- **API (`public/api/dang_ky_tham_gia.php`):** Sử dụng Repository để thực hiện các thao tác đăng ký, hủy đăng ký và xóa đăng ký đã hủy.
+
+### 4. Các chức năng đã kiểm thử
+| STT | Chức năng | Kết quả |
+|---|---|---|
+| 1 | Hiển thị danh sách sự kiện đã đăng ký | Đạt |
+| 2 | Tìm kiếm đăng ký theo tên sự kiện | Đạt |
+| 3 | Tìm kiếm đăng ký theo tên câu lạc bộ | Đạt |
+| 4 | Hủy đăng ký sự kiện đủ điều kiện | Đạt |
+| 5 | Xóa đăng ký đã hủy | Đạt |
+
+### 5. Kết quả
+Đã tách các thao tác truy vấn dữ liệu sang Repository, giúp Controller tập trung xử lý luồng nghiệp vụ và View tập trung hiển thị giao diện. Các chức năng chính sau khi refactor đã được chạy thử và hoạt động đúng.
