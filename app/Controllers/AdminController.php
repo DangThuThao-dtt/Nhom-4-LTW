@@ -1,79 +1,135 @@
 
 <?php
-require_once __DIR__ . '/../Models/TaiKhoan.php';
+require_once __DIR__ . '/../Repositories/TaiKhoanRepository.php';
 require_once __DIR__ . '/../Models/CauLacBo.php';
 require_once __DIR__ . '/../Models/QuanLySuKien.php';
 require_once __DIR__ . '/../Models/ThongKe.php';
+require_once __DIR__ . '/../Models/TaiKhoanThanhVien.php';
 
 class AdminController
 {
     private CauLacBo $cauLacBo;
     private QuanLySuKien $suKien;
     private ThongKe $thongKe;
-    private TaiKhoan $taiKhoan;
+    private TaiKhoanRepository $taiKhoanRepository;
+    private TaiKhoanThanhVien $taiKhoanThanhVien;
 
     public function __construct()
     {
         $this->cauLacBo = new CauLacBo();
         $this->suKien = new QuanLySuKien();
         $this->thongKe = new ThongKe();
-        $this->taiKhoan = new TaiKhoan();
+        $this->taiKhoanRepository = new TaiKhoanRepository();
+        $this->taiKhoanThanhVien = new TaiKhoanThanhVien();
     }
 
     // =========================
     // QUAN LY CAU LAC BO
     // =========================
 
-    public function danhSachCauLacBo(): void
-    {
-        $danhSachCauLacBo = $this->cauLacBo->layDanhSach();
-        require __DIR__ . '/../Views/admin/cau_lac_bo.php';
-    }
+public function danhSachCauLacBo(): void
+{
+    $this->yeuCauAdmin();
 
-    public function themCauLacBo(): void
-    {
-        $this->chiNhanPOST();
+    $cheDo = 'danh_sach';
+    $danhSach = $this->cauLacBo->layDanhSach();
 
+    require __DIR__ . '/../Views/admin/cau_lac_bo.php';
+}
+public function themCauLacBo(): void
+{
+    $this->yeuCauAdmin();
+
+    $cheDo = 'them';
+    $loi = '';
+    $ten = '';
+    $moTa = '';
+    $nguoiQuanLyId = '';
+
+    // GET: hiển thị biểu mẫu.
+    // POST: kiểm tra và lưu dữ liệu.
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ten = trim($_POST['ten_cau_lac_bo'] ?? '');
         $moTa = trim($_POST['mo_ta'] ?? '');
-        $quanLy = $_POST['nguoi_quan_ly_id'] ?? '';
+        $nguoiQuanLyId = trim($_POST['nguoi_quan_ly_id'] ?? '');
 
         if ($ten === '') {
-            exit('Ten cau lac bo khong duoc de trong.');
+            $loi = 'Tên câu lạc bộ không được để trống.';
+        } elseif (
+            $nguoiQuanLyId !== '' &&
+            (!ctype_digit($nguoiQuanLyId) || (int) $nguoiQuanLyId <= 0)
+        ) {
+            $loi = 'Mã người quản lý không hợp lệ.';
+        } else {
+            $this->cauLacBo->them(
+                $ten,
+                $moTa !== '' ? $moTa : null,
+                $nguoiQuanLyId !== '' ? (int) $nguoiQuanLyId : null
+            );
+
+            $this->chuyenHuong('quan-ly-cau-lac-bo');
+            return;
         }
-
-        $this->cauLacBo->them(
-            $ten,
-            $moTa !== '' ? $moTa : null,
-            $quanLy !== '' ? (int) $quanLy : null
-        );
-
-        $this->chuyenHuong('quan-ly-cau-lac-bo');
     }
 
-    public function capNhatCauLacBo(): void
-    {
-        $this->chiNhanPOST();
+    require __DIR__ . '/../Views/admin/cau_lac_bo.php';
+}
+public function suaCauLacBo(): void
+{
+    $this->yeuCauAdmin();
 
-        $id = (int) ($_POST['id'] ?? 0);
-        $ten = trim($_POST['ten_cau_lac_bo'] ?? '');
-        $moTa = trim($_POST['mo_ta'] ?? '');
-        $quanLy = $_POST['nguoi_quan_ly_id'] ?? '';
+    $id = (int) ($_GET['id'] ?? 0);
 
-        if ($id <= 0 || $ten === '') {
-            exit('Du lieu cau lac bo khong hop le.');
-        }
-
-        $this->cauLacBo->capNhat(
-            $id,
-            $ten,
-            $moTa !== '' ? $moTa : null,
-            $quanLy !== '' ? (int) $quanLy : null
-        );
-
-        $this->chuyenHuong('quan-ly-cau-lac-bo');
+    if ($id <= 0) {
+        http_response_code(400);
+        exit('ID câu lạc bộ không hợp lệ.');
     }
 
+    $clb = $this->cauLacBo->timTheoId($id);
+
+    if (!$clb) {
+        http_response_code(404);
+        exit('Không tìm thấy câu lạc bộ.');
+    }
+
+    $cheDo = 'sua';
+    $loi = '';
+    $ten = $clb['ten_cau_lac_bo'] ?? '';
+    $moTa = $clb['mo_ta'] ?? '';
+    $nguoiQuanLyId = $clb['nguoi_quan_ly_id'] ?? '';
+
+    require __DIR__ . '/../Views/admin/cau_lac_bo.php';
+}
+public function capNhatCauLacBo(): void
+{
+    $this->yeuCauAdmin();
+    $this->chiNhanPOST();
+
+    $id = (int) ($_GET['id'] ?? $_POST['id'] ?? 0);
+    $ten = trim($_POST['ten_cau_lac_bo'] ?? '');
+    $moTa = trim($_POST['mo_ta'] ?? '');
+    $quanLy = trim($_POST['nguoi_quan_ly_id'] ?? '');
+
+    if ($id <= 0 || $ten === '') {
+        exit('Dữ liệu câu lạc bộ không hợp lệ.');
+    }
+
+    if (
+        $quanLy !== '' &&
+        (!ctype_digit($quanLy) || (int) $quanLy <= 0)
+    ) {
+        exit('Mã người quản lý không hợp lệ.');
+    }
+
+    $this->cauLacBo->capNhat(
+        $id,
+        $ten,
+        $moTa !== '' ? $moTa : null,
+        $quanLy !== '' ? (int) $quanLy : null
+    );
+
+    $this->chuyenHuong('quan-ly-cau-lac-bo');
+}
     public function xoaCauLacBo(): void
     {
         $this->chiNhanPOST();
@@ -259,7 +315,44 @@ public function xemChiTietSuKien(): void
 
         require __DIR__ . '/../Views/admin/thong_ke.php';
     }
+public function dashboard(): void
+{
+    $this->yeuCauAdmin();
 
+    // Tổng số sự kiện.
+    $tongSuKien = (int) $this->thongKe->tongSoSuKien();
+
+    // Tổng số tài khoản Ban tổ chức.
+    $tongBanToChuc = $this->taiKhoanRepository
+    ->tongTaiKhoanBanToChuc();
+
+    // Lấy số lượng sự kiện theo trạng thái.
+    $thongKeTrangThai = $this->thongKe->demTheoTrangThai();
+
+    // Tạm khởi tạo bằng 0, sau đó lấy số liệu theo trạng thái thực tế.
+    $tongSuKienChoDuyet = 0;
+    $tongSuKienDangDienRa = 0;
+
+    foreach ($thongKeTrangThai as $item) {
+        $trangThai = $item['trang_thai'] ?? '';
+        $soLuong = (int) (
+            $item['so_luong']
+            ?? $item['tong']
+            ?? $item['total']
+            ?? 0
+        );
+
+        if ($trangThai === 'nhap') {
+            $tongSuKienChoDuyet += $soLuong;
+        }
+
+        if ($trangThai === 'cong_khai') {
+            $tongSuKienDangDienRa += $soLuong;
+        }
+    }
+
+    require __DIR__ . '/../Views/admin/dashboard.php';
+}
     // =========================
     // HAM HO TRO
     // =========================
@@ -343,6 +436,26 @@ private function kiemTraDuLieuSuKien(array $data): void
             exit('Thoi gian ket thuc phai sau thoi gian bat dau.');
         }
     }
+    // =========================
+// QUAN LY TAI KHOAN THANH VIEN CLB
+// =========================
+public function danhSachTaiKhoanThanhVien(): void
+{
+    $this->yeuCauAdmin();
+
+    $danhSachTaiKhoanThanhVien =
+        $this->taiKhoanThanhVien->danhSachTaiKhoanThanhVien();
+
+    $danhSachCauLacBo = [];
+    $tuKhoa = '';
+    $cauLacBoId = 0;
+    $tongTaiKhoan = count($danhSachTaiKhoanThanhVien);
+    $tongKetQua = count($danhSachTaiKhoanThanhVien);
+    $trang = 1;
+    $tongTrang = 1;
+
+    require __DIR__ . '/../Views/admin/tai_khoan_thanh_vien.php';
+}
 public function danhSachTaiKhoan(): void
 {
     $this->yeuCauAdmin();
@@ -353,27 +466,33 @@ public function danhSachTaiKhoan(): void
     $soDongMoiTrang = 10;
     $trang = max(1, (int) ($_GET['trang'] ?? 1));
 
-    $tongTaiKhoan = $this->taiKhoan->tongTaiKhoanBanToChuc();
-    $tongKetQua = $this->taiKhoan->demTaiKhoanBanToChuc(
-        $tuKhoa,
-        $cauLacBoId
+    $tongTaiKhoan = $this->taiKhoanRepository
+        ->tongTaiKhoanBanToChuc();
+
+    $tongKetQua = $this->taiKhoanRepository
+        ->demTaiKhoanBanToChuc($tuKhoa, $cauLacBoId);
+
+    $tongTrang = max(
+        1,
+        (int) ceil($tongKetQua / $soDongMoiTrang)
     );
 
-    $tongTrang = max(1, (int) ceil($tongKetQua / $soDongMoiTrang));
     $trang = min($trang, $tongTrang);
     $offset = ($trang - 1) * $soDongMoiTrang;
 
-    $danhSachTaiKhoan = $this->taiKhoan->danhSachBanToChuc(
-        $tuKhoa,
-        $cauLacBoId,
-        $soDongMoiTrang,
-        $offset
-    );
+    $danhSachTaiKhoan = $this->taiKhoanRepository
+        ->danhSachBanToChuc(
+            $tuKhoa,
+            $cauLacBoId,
+            $soDongMoiTrang,
+            $offset
+        );
 
     $danhSachCauLacBo = $this->cauLacBo->layDanhSach();
 
     require __DIR__ . '/../Views/admin/tai_khoan.php';
 }
+
 public function themTaiKhoan(): void
 {
     $this->yeuCauAdmin();
@@ -396,7 +515,7 @@ public function themTaiKhoan(): void
     }
 
     try {
-        $this->taiKhoan->taoBanToChuc(
+        $this->taiKhoanRepository->taoBanToChuc(
             $hoTen,
             $email,
             $matKhau,
@@ -442,7 +561,7 @@ public function capNhatTaiKhoan(): void
 
     // Chỉ yêu cầu mật khẩu hiện tại nếu Admin muốn đổi mật khẩu tài khoản.
     if ($matKhauMoi !== '' || $xacNhanMatKhau !== '' || $matKhauCu !== '') {
-        if ($matKhauCu === '' || !$this->taiKhoan->kiemTraMatKhauHienTai($id, $matKhauCu)) {
+        if ($matKhauCu === '' || !$this->taiKhoanRepository->kiemTraMatKhauHienTai($id, $matKhauCu)) {
             header('Location: ?action=quan-ly-tai-khoan&thong_bao=mat_khau_cu_khong_dung');
             exit;
         }
@@ -459,10 +578,10 @@ public function capNhatTaiKhoan(): void
     }
 
     try {
-        $this->taiKhoan->capNhatThongTin($id, $hoTen, $email, $cauLacBoId);
+        $this->taiKhoanRepository->capNhatThongTin($id, $hoTen, $email, $cauLacBoId);
 
         if ($matKhauMoi !== '') {
-            $this->taiKhoan->datLaiMatKhau($id, $matKhauMoi);
+            $this->taiKhoanRepository->datLaiMatKhau($id, $matKhauMoi);
         }
     } catch (PDOException $e) {
         header('Location: ?action=quan-ly-tai-khoan&thong_bao=email_da_ton_tai');
@@ -497,7 +616,7 @@ public function datLaiMatKhauTaiKhoan(): void
         );
     }
 
-    $thanhCong = $this->taiKhoan->datLaiMatKhau($id, $matKhauMoi);
+    $thanhCong = $this->taiKhoanRepository->datLaiMatKhau($id, $matKhauMoi);
 
     if (!$thanhCong) {
         header(
