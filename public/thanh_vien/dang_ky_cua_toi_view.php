@@ -1,4 +1,3 @@
-<!-- public/thanh_vien/dang_ky_cua_toi_view.php (FILE VỎ TẠM) -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -33,10 +32,34 @@
         .modal-btn { padding: 10px 20px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; }
         .modal-btn-cancel { background: #e0e0e0; color: #333; }
         .modal-btn-confirm { background: #dc3545; color: white; }
+
+        /* CSS CHO HỘP THÔNG BÁO NHẮC NHỞ */
+        .thong-bao-nhac-nho {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            border-left: 5px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .thong-bao-nhac-nho.danger { background-color: #f8d7da; color: #721c24; border-left-color: #dc3545; }
+        .thong-bao-nhac-nho.warning { background-color: #fff3cd; color: #856404; border-left-color: #ffc107; }
+        .thong-bao-nhac-nho.success { background-color: #d4edda; color: #155724; border-left-color: #28a745; }
     </style>
 </head>
 <body>
     <h1>📋 Sự kiện của tôi</h1>
+    
+    <!-- HỘP THÔNG BÁO NHẮC NHỞ -->
+    <?php if (!empty($thongBaoNhacNho)): ?>
+        <div class="thong-bao-nhac-nho <?= $loaiThongBao ?>">
+            <?= $thongBaoNhacNho ?>
+        </div>
+    <?php endif; ?>
+
     <div id="thongBao" class="message"></div>
 
     <!-- Form tìm kiếm -->
@@ -85,7 +108,6 @@
                         </td>
                         <td>
                             <?php if ($dk['trang_thai_dang_ky'] === 'da_dang_ky'): ?>
-                                <!-- QUAN TRỌNG: Nút này phải có class btn-huy, data-id và data-ten -->
                                 <button class="btn-huy" 
                                         data-id="<?= $dk['dang_ky_id'] ?>"
                                         data-ten="<?= htmlspecialchars($dk['ten_su_kien']) ?>">
@@ -113,7 +135,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT (Bạn giữ phần logic này, đừng để người khác sửa) -->
+    <!-- JAVASCRIPT -->
     <script>
     let dangKyIdCanHuy = null;
     let buttonDangHuy = null;
@@ -150,17 +172,16 @@
         btn.disabled = true;
         btn.textContent = 'Đang xử lý...';
 
-        // Gọi API
+        // Gọi API Hủy
         fetch('../api/huy_dang_ky.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `action=huy_dang_ky&dang_ky_id=${dangKyId}`
+            body: `dang_ky_id=${dangKyId}`
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
                 hienThiThongBao(data.message, 'success');
-                // Cập nhật lại giao diện (nếu người 2 đổi bố cục, phải sửa lại các selector này)
                 row.querySelector('td:nth-child(6)').innerHTML = '<span class="trang-thai-chu da-huy">Đã hủy</span>';
                 row.querySelector('td:nth-child(7)').innerHTML = '<span>—</span>';
             } else {
