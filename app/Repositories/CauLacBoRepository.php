@@ -1,7 +1,7 @@
 
 <?php
 
-class CauLacBo
+class CauLacBoRepository
 {
     private PDO $pdo;
 
@@ -10,7 +10,7 @@ class CauLacBo
         $this->pdo = $pdo;
     }
 
-    // Lay danh sach cau lac bo theo ID tu be den lon
+    // Lấy danh sách câu lạc bộ
     public function layDanhSach(): array
     {
         $sql = "
@@ -32,7 +32,26 @@ class CauLacBo
         return $stmt->fetchAll();
     }
 
-    // Them cau lac bo
+    // Lấy thông tin một câu lạc bộ theo ID
+    public function layTheoId(int $id): array|false
+    {
+        $sql = "
+            SELECT
+                id,
+                ten_cau_lac_bo,
+                mo_ta,
+                nguoi_quan_ly_id
+            FROM cau_lac_bo
+            WHERE id = :id
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->fetch();
+    }
+
+    // Thêm câu lạc bộ
     public function them(
         string $ten,
         ?string $moTa,
@@ -54,7 +73,7 @@ class CauLacBo
         ]);
     }
 
-    // Cap nhat cau lac bo
+    // Cập nhật câu lạc bộ
     public function capNhat(
         int $id,
         string $ten,
@@ -79,13 +98,37 @@ class CauLacBo
         ]);
     }
 
-    // Xoa cau lac bo
+    // Xóa câu lạc bộ
     public function xoa(int $id): bool
     {
-        $stmt = $this->pdo->prepare(
-            "DELETE FROM cau_lac_bo WHERE id = :id"
-        );
+        $sql = "
+            DELETE FROM cau_lac_bo
+            WHERE id = :id
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
 
         return $stmt->execute(['id' => $id]);
+    }
+        // Lấy số liệu thống kê cho trang Dashboard
+    public function layThongKeDashboard(): array
+    {
+        $tongCauLacBo = (int) $this->pdo
+            ->query("SELECT COUNT(*) FROM cau_lac_bo")
+            ->fetchColumn();
+
+        $tongTaiKhoan = (int) $this->pdo
+            ->query("SELECT COUNT(*) FROM nguoi_dung")
+            ->fetchColumn();
+
+        $tongSuKien = (int) $this->pdo
+            ->query("SELECT COUNT(*) FROM su_kien")
+            ->fetchColumn();
+
+        return [
+            'tongCauLacBo' => $tongCauLacBo,
+            'tongTaiKhoan' => $tongTaiKhoan,
+            'tongSuKien' => $tongSuKien,
+        ];
     }
 }

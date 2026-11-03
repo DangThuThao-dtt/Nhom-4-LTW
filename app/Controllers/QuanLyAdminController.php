@@ -2,7 +2,7 @@
 <?php
 
 require_once __DIR__ . '/../Core/ket_noi_csdl.php';
-require_once __DIR__ . '/../Models/CauLacBo.php';
+require_once __DIR__ . '/../Repositories/CauLacBoRepository.php';
 
 class QuanLyAdminController
 {
@@ -12,16 +12,14 @@ class QuanLyAdminController
     // Trang Dashboard Admin
     public function dashboard(): void
     {
-        $pdo = $GLOBALS['pdo'];
+        $repository = new CauLacBoRepository($GLOBALS['pdo']);
 
-        $stmt = $pdo->query("SELECT COUNT(*) FROM cau_lac_bo");
-        $tongCauLacBo = (int) $stmt->fetchColumn();
+        // Lấy số liệu thống kê từ Repository
+        $thongKe = $repository->layThongKeDashboard();
 
-        $stmt = $pdo->query("SELECT COUNT(*) FROM nguoi_dung");
-        $tongTaiKhoan = (int) $stmt->fetchColumn();
-
-        $stmt = $pdo->query("SELECT COUNT(*) FROM su_kien");
-        $tongSuKien = (int) $stmt->fetchColumn();
+        $tongCauLacBo = $thongKe['tongCauLacBo'];
+        $tongTaiKhoan = $thongKe['tongTaiKhoan'];
+        $tongSuKien = $thongKe['tongSuKien'];
 
         require __DIR__ . '/../Views/admin/dashboard.php';
     }
@@ -29,8 +27,9 @@ class QuanLyAdminController
     // Danh sách câu lạc bộ
     public function danhSachCauLacBo(): void
     {
-        $model = new CauLacBo($GLOBALS['pdo']);
-        $danhSach = $model->layDanhSach();
+        $repository = new CauLacBoRepository($GLOBALS['pdo']);
+
+        $danhSach = $repository->layDanhSach();
 
         require __DIR__ . '/../Views/admin/cau_lac_bo.php';
     }
@@ -38,7 +37,7 @@ class QuanLyAdminController
     // Thêm câu lạc bộ
     public function themCauLacBo(): void
     {
-        $model = new CauLacBo($GLOBALS['pdo']);
+        $repository = new CauLacBoRepository($GLOBALS['pdo']);
 
         $loi = '';
         $ten = '';
@@ -59,7 +58,7 @@ class QuanLyAdminController
                 $loi = 'Mã người quản lý không hợp lệ.';
             } else {
                 try {
-                    $thanhCong = $model->them(
+                    $thanhCong = $repository->them(
                         $ten,
                         $moTa !== '' ? $moTa : null,
                         $nguoiQuanLyId !== ''
@@ -89,8 +88,7 @@ class QuanLyAdminController
     // Sửa thông tin câu lạc bộ
     public function suaCauLacBo(): void
     {
-        $pdo = $GLOBALS['pdo'];
-        $model = new CauLacBo($pdo);
+        $repository = new CauLacBoRepository($GLOBALS['pdo']);
 
         $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
@@ -99,14 +97,8 @@ class QuanLyAdminController
             exit('ID câu lạc bộ không hợp lệ.');
         }
 
-        // Lấy thông tin câu lạc bộ cần sửa
-        $stmt = $pdo->prepare(
-            "SELECT id, ten_cau_lac_bo, mo_ta, nguoi_quan_ly_id
-             FROM cau_lac_bo
-             WHERE id = :id"
-        );
-        $stmt->execute(['id' => $id]);
-        $clb = $stmt->fetch();
+        // Lấy thông tin câu lạc bộ từ Repository
+        $clb = $repository->layTheoId($id);
 
         if (!$clb) {
             http_response_code(404);
@@ -133,7 +125,7 @@ class QuanLyAdminController
                 $loi = 'Mã người quản lý không hợp lệ.';
             } else {
                 try {
-                    $thanhCong = $model->capNhat(
+                    $thanhCong = $repository->capNhat(
                         $id,
                         $ten,
                         $moTa !== '' ? $moTa : null,
@@ -181,10 +173,10 @@ class QuanLyAdminController
             exit;
         }
 
-        $model = new CauLacBo($GLOBALS['pdo']);
+        $repository = new CauLacBoRepository($GLOBALS['pdo']);
 
         try {
-            $thanhCong = $model->xoa($id);
+            $thanhCong = $repository->xoa($id);
 
             if ($thanhCong) {
                 header(
@@ -200,7 +192,7 @@ class QuanLyAdminController
             );
             exit;
         } catch (PDOException $e) {
-            // Ghi chi tiết lỗi vào log, không hiển thị lỗi SQL cho người dùng
+            // Ghi chi tiết lỗi vào log
             error_log($e->getMessage());
 
             header(
