@@ -488,29 +488,38 @@ Mỗi thành viên bổ sung các route thực tế do mình phụ trách sau kh
 ### 7.2. Trần Thị Bình Minh
 
 - **Nhánh Git:** `feature/event-discovery`
-- **Commit:** Điền mã commit sau khi commit các thay đổi.
+- **Commit:**  0ad329d
 - **Pull Request:** Điền liên kết sau khi tạo Pull Request (nếu nhóm sử dụng).
 - **Ảnh giao diện:** Wireframe Figma: https://www.figma.com/design/qmhpkTAKk4V1wn8RcFlxtm; cần bổ sung ảnh chụp chạy thực tế trên XAMPP.
 - **Kết quả kiểm tra đã thực hiện:** Tất cả file PHP trong gói vượt qua kiểm tra cú pháp `php -l`.
-- **Kết quả kiểm thử tích hợp:** Chưa xác minh được vì môi trường hiện tại không có PDO driver MySQL; cần chạy trên XAMPP với cơ sở dữ liệu `quan_ly_su_kien`.
+- **Kết quả kiểm thử:** Đã kiểm tra thành công chức năng hiển thị danh sách đăng ký của người dùng, tìm kiếm đăng ký theo tên sự kiện và tên câu lạc bộ, hủy đăng ký đối với sự kiện đủ điều kiện và xóa đăng ký đã hủy.
+- **Ghi chú tích hợp:** Xây dựng giao diện danh sách và chi tiết sự kiện dành cho thành viên, hỗ trợ tìm kiếm và lọc sự kiện; tích hợp các chức năng thông qua route trong `public/index.php`. Refactor chức năng Đăng ký của tôi theo mô hình Repository – Controller – View; tạo `DangKyRepository.php` để tập trung các truy vấn và thao tác dữ liệu đăng ký; cập nhật `dang_ky_controller.php` để tiếp nhận yêu cầu, gọi Repository và chuyển dữ liệu sang View; cập nhật `dang_ky_tham_gia.php` để sử dụng Repository cho các thao tác đăng ký, hủy đăng ký và xóa đăng ký đã hủy; tách giao diện tại `app/Views/thanh_vien/dang_ky_cua_toi.php`; xóa Model cũ `app/Models/dang_ky.php` sau khi xác nhận không còn được sử dụng.
 
 ### 7.3. Đặng Thu Thảo
 
-- **Nhánh Git:** `feature/event-registration`
-- **Commit:** `988f534`
-- **Pull Request:** 
-- **Ảnh giao diện:** 
-- **Kết quả kiểm thử:** Đã test thành công các trường hợp: Đăng ký thành công, Đăng ký trùng, Đăng ký khi hết chỗ, Hủy đăng ký thành công, Hủy khi quá hạn. Giao diện hiển thị đúng.
-- **Ghi chú tích hợp:** Đã tích hợp thành công Fetch API. Đã xử lý triệt để lỗi Race Condition khi đăng ký bằng Transaction và FOR UPDATE.
+- Nhánh Git: feature/event-registration
+- Commit: 988f534 
+- Pull Request: 
+- Ảnh giao diện: `docs\minh_chung_nguoi_3`
+- Kết quả kiểm thử: Đã test thành công các trường hợp: Đăng ký thành công, Đăng ký trùng, Đăng ký khi hết chỗ, Hủy đăng ký thành công, Hủy khi quá hạn 24h. Giao diện hiển thị đúng thông báo Toast/Modal.
+- Ghi chú tích hợp:
+  - Đã tích hợp thành công Fetch API (không load lại trang).
+  - Đã xử lý triệt để lỗi Race Condition khi đăng ký bằng Transaction và `FOR UPDATE`.
+  - Refactor: Đã hoàn thành việc tách biệt kiến trúc sang mô hình MVC (Repository - Controller - View) theo yêu cầu. Toàn bộ SQL được chuyển vào `DangKyRepository.php`, logic xử lý nằm trong `DangKyController.php`, và giao diện tách riêng tại `dang_ky_cua_toi_view.php`.
 
 ### 7.4. Nguyễn Phương Anh
 
 - **Nhánh Git dự kiến theo phân công:** `feature/admin-clubs-users`.
 - **Commit:** Chưa cung cấp mã commit; bổ sung sau khi kiểm tra lịch sử Git.
 - **Pull Request:** Chưa cung cấp liên kết.
-- **Ảnh giao diện:** Bổ sung ảnh Dashboard Admin, danh sách câu lạc bộ, form thêm/sửa và trang tài khoản sau khi lưu vào thư mục minh chứng.
-- **Kết quả kiểm thử:** Đã kiểm tra thao tác xóa câu lạc bộ thành công và giao diện hiển thị thông báo “Xóa câu lạc bộ thành công!”. Chưa có kết quả kiểm thử xác nhận cho trường hợp xóa bị ràng buộc khóa ngoại, danh sách tài khoản và phân quyền Admin.
-- **Ghi chú tích hợp:** Kiểm tra trạng thái nhánh, commit và Pull Request thực tế trước khi nộp; không ghi nhận các mục chưa xác minh là hoàn thành.
+- **Ảnh giao diện:** Bổ sung ảnh Dashboard Admin, danh sách câu lạc
+bộ, biểu mẫu thêm/sửa câu lạc bộ và danh sách tài khoản vào
+docs/minh_chung/.
+- **Kết quả kiểm thử:** Đã kiểm tra thao tác xóa câu lạc bộ hợp lệ và
+giao diện hiển thị thông báo "Xóa câu lạc bộ thành công!". Các
+trường hợp xóa bị ràng buộc khóa ngoại, danh sách tài khoản và phân
+quyền Admin chưa có kết quả kiểm thử xác nhận.
+- **Ghi chú tích hợp:** Đã xây dựng Dashboard Admin, quản lý câu lạc bộ và hiển thị danh sách tài khoản; đồng thời tạo CauLacBoRepository.php để tách các truy vấn SQL khỏi Controller. Đang tiếp tục kết nối Repository và kiểm thử lại chức năng CRUD.
 
 ### 7.5. Bùi Mai Phương
 
@@ -522,9 +531,11 @@ Mỗi thành viên bổ sung các route thực tế do mình phụ trách sau kh
 - **View chi tiết sự kiện:** `app/Views/admin/chi_tiet_su_kien.php`.
 - **View thống kê:** `app/Views/admin/thong_ke.php`.
 - **View quản lý tài khoản Ban tổ chức:** `app/Views/admin/tai_khoan.php`.
+- **Repository quản lý tài khoản:** `app/Repositories/TaiKhoanRepository.php` – xử lý truy vấn và thao tác dữ liệu tài khoản Ban tổ chức, tách biệt với Controller.
 - **Checklist kiểm thử:** `docs/checklist_kiem_thu_sv5.md` – danh sách các trường hợp kiểm thử chức năng Admin; kết quả thực tế được cập nhật sau khi chạy kiểm thử.
 - **Danh sách route:** `docs/routes_sv5.md` – tổng hợp các route thuộc phạm vi phụ trách và chức năng tương ứng.
-- **Ghi chú tích hợp:** Các thay đổi được quản lý trên nhánh `feature/admin-events-stats`. Trước khi commit, kiểm tra danh sách file và nội dung thay đổi đã staged để bảo đảm chỉ đưa vào commit những phần thuộc phạm vi phụ trách hoặc đã được nhóm thống nhất. Các chức năng, kết quả kiểm thử và minh chứng chỉ được xác nhận hoàn thành sau khi kiểm tra thực tế.
+- **Ảnh minh chứng:** `doc/minh_chung/` – lưu ảnh chụp giao diện và kết quả chạy các chức năng Admin.
+- **Ghi chú tích hợp:** Các thay đổi được quản lý trên nhánh `feature/admin-events-stats`. Đối với chức năng quản lý Ban tổ chức, sử dụng `TaiKhoanRepository` để tách phần truy vấn và thao tác dữ liệu khỏi `AdminController`. Controller tiếp nhận yêu cầu và gọi Repository xử lý dữ liệu, giúp phân tách trách nhiệm, thuận tiện bảo trì và tích hợp với các thành viên trong nhóm. Trước khi commit, kiểm tra danh sách file và nội dung thay đổi đã staged để bảo đảm chỉ đưa vào commit những phần thuộc phạm vi phụ trách hoặc đã được nhóm thống nhất. Các chức năng, kết quả kiểm thử và minh chứng chỉ được xác nhận hoàn thành sau khi kiểm tra thực tế.
 
 ## 8. Hướng dẫn cài đặt và chạy dự án
 
@@ -586,10 +597,21 @@ Nếu thư mục dự án nằm tại `htdocs/Nhom-4-LTW`, truy cập địa ch�
 ### 9.1. Kết quả đã hoàn thành
 
 - **SV1 – Trương Mỹ Hoa:** Hoàn thiện CRUD sự kiện; refactor thao tác cơ sở dữ liệu sang `SuKienRepository.php`, sử dụng `SuKienController.php` để xử lý yêu cầu; xây dựng giao diện View và kiểm tra dữ liệu đầu vào theo kết quả kiểm thử thực tế.
-- **SV2 – Trần Thị Bình Minh:** Cần cập nhật kết quả kiểm thử thực tế của các chức năng hiển thị danh sách, xem chi tiết, tìm kiếm và lọc sự kiện.
-- **SV3 – Đặng Thu Thảo:** Cần cập nhật kết quả kiểm thử thực tế của các chức năng đăng ký sự kiện, hủy đăng ký và xử lý yêu cầu bằng Fetch API.
-- **SV4 – Nguyễn Phương Anh:** Theo nội dung đã ghi nhận, đã xây dựng các màn hình Dashboard Admin, danh sách câu lạc bộ, biểu mẫu thêm/sửa câu lạc bộ và danh sách tài khoản; thao tác xóa câu lạc bộ đã được kiểm tra thành công. Chức năng cập nhật tài khoản/vai trò, xác minh quyền Admin và kiểm thử trường hợp xóa bị ràng buộc khóa ngoại cần được hoàn thiện hoặc xác nhận thêm.
-- **SV5 – Bùi Mai Phương:** Cần cập nhật kết quả kiểm thử thực tế của các chức năng quản lý sự kiện Admin và thống kê.
+- **SV2 – Trần Thị Bình Minh:** Đã xây dựng giao diện khám phá sự kiện dành cho thành viên, bao gồm danh sách sự kiện, chi tiết sự kiện và các chức năng tìm kiếm, lọc sự kiện. Bên cạnh đó, đã thực hiện refactor chức năng Đăng ký của tôi sang mô hình Repository – Controller – View. Các thao tác truy vấn dữ liệu được tập trung trong Repository, Controller đảm nhiệm xử lý yêu cầu và View phụ trách hiển thị giao diện. Đã kiểm thử thành công các chức năng hiển thị danh sách đăng ký, tìm kiếm theo tên sự kiện, tìm kiếm theo câu lạc bộ, hủy đăng ký và xóa đăng ký đã hủy.
+**SV3 – Đặng Thu Thảo:** Đã xây dựng thành công chức năng Đăng ký, Hủy đăng ký và trang "Sự kiện của tôi". Tích hợp thành công Fetch API giúp giao diện mượt mà, hiển thị thông báo lỗi/thành công trực quan. Đặc biệt, đã hoàn thành việc **Refactor CRUD sang mô hình Repository - Controller - View**, giúp code gọn gàng, dễ bảo trì và đáp ứng đầy đủ các quy tắc nghiệp vụ phức tạp (chặn hết chỗ, chặn trùng, chặn hạn 24h).
+- **SV4 – Nguyễn Phương Anh:** Đã xây dựng các màn hình Dashboard Admin, danh sách câu lạc bộ, form thêm/sửa câu lạc bộ và danh sách tài khoản; đã kiểm tra thao tác xóa câu lạc bộ thành công. Mã nguồn giao diện được đặt trong app/Views/admin/, Controller quản lý câu lạc bộ nằm tại app/Controllers/QuanLyAdminController.php. Repository app/Repositories/CauLacBoRepository.php đã được tạo và đang trong quá trình chuyển các truy vấn SQL sang Repository. Việc kết nối Repository với Controller, rà soát Model cũ và kiểm thử lại CRUD sau refactor vẫn đang tiếp tục. Các nội dung cập nhật tài khoản/vai trò, xác minh phân quyền Admin và kiểm thử tình huống xóa câu lạc bộ bị ràng buộc khóa ngoại cần được hoàn thiện hoặc xác nhận thêm.
+- **SV5 – Bùi Mai Phương:**
+  - Thực hiện và phát triển các chức năng quản trị Admin, bao gồm quản lý sự kiện, xem chi tiết sự kiện và thống kê.
+  - Xây dựng giao diện quản lý sự kiện tại `app/Views/admin/su_kien.php`.
+  - Xây dựng giao diện xem chi tiết sự kiện tại `app/Views/admin/chi_tiet_su_kien.php`.
+  - Xây dựng giao diện thống kê tại `app/Views/admin/thong_ke.php`.
+  - Thực hiện chức năng quản lý tài khoản Ban tổ chức tại `app/Views/admin/tai_khoan.php`, hỗ trợ quản lý thông tin tài khoản và câu lạc bộ.
+  - Xây dựng lớp `TaiKhoanRepository.php` trong thư mục `app/Repositories` để đảm nhiệm việc truy vấn và thao tác dữ liệu tài khoản Ban tổ chức.
+  - Tích hợp `TaiKhoanRepository` vào `AdminController.php`, chuyển các thao tác xử lý dữ liệu tài khoản sang Repository.
+  - Kết nối chức năng quản lý tài khoản với cơ sở dữ liệu thông qua PDO.
+  - Tổ chức các route và tài liệu kiểm thử thuộc phạm vi phụ trách tại `docs/routes_sv5.md` và `docs/checklist_kiem_thu_sv5.md`.
+  - Bổ sung ảnh minh chứng quá trình thực hiện và kết quả giao diện tại `doc/minh_chung/`.
+  - Áp dụng cách phân chia trách nhiệm giữa Controller, Repository và View nhằm giúp mã nguồn rõ ràng, dễ bảo trì và thuận tiện cho việc phát triển, tích hợp các chức năng trong dự án.
 
 ### 9.2. Kết quả tích hợp toàn hệ thống
 
@@ -605,4 +627,4 @@ Nếu thư mục dự án nằm tại `htdocs/Nhom-4-LTW`, truy cập địa ch�
 - **Thư mục ảnh minh chứng:** Bổ sung đường dẫn thư mục chứa ảnh kiểm thử của từng thành viên.
 - **File slide:** Bổ sung tên hoặc đường dẫn file slide thuyết trình.
 - **Tài liệu wireframe:** Bổ sung tên hoặc đường dẫn tài liệu wireframe.
-- **Người tổng hợp:** Bùi Mai Phương.
+- **Người tổng hợp:** 
