@@ -6,6 +6,8 @@ $loi = '';
 $ho_ten = '';
 $email = '';
 $so_dien_thoai = '';
+$khoa = '';
+$nganh = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ho_ten = trim($_POST['ho_ten'] ?? '');
@@ -13,8 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $so_dien_thoai = trim($_POST['so_dien_thoai'] ?? '');
     $mat_khau = $_POST['mat_khau'] ?? '';
     $xac_nhan_mat_khau = $_POST['xac_nhan_mat_khau'] ?? '';
+    $khoa = trim($_POST['khoa'] ?? '');
+    $nganh = trim($_POST['nganh'] ?? '');
 
-    if ($ho_ten === '' || $email === '' || $so_dien_thoai === '' || $mat_khau === '' || $xac_nhan_mat_khau === '') {
+    if (
+    $ho_ten === '' ||
+    $email === '' ||
+    $so_dien_thoai === '' ||
+    $khoa === '' ||
+    $nganh === '' ||
+    $mat_khau === '' ||
+    $xac_nhan_mat_khau === ''
+) {
         $loi = 'Vui lòng nhập đầy đủ thông tin.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $loi = 'Địa chỉ email không hợp lệ.';
@@ -25,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             // Kiểm tra email đã được sử dụng chưa.
-            $kiem_tra = $conn->prepare('SELECT id FROM nguoi_dung WHERE email = :email LIMIT 1');
+            $kiem_tra = $pdo->prepare('SELECT id FROM nguoi_dung WHERE email = :email LIMIT 1');
             $kiem_tra->execute(['email' => $email]);
 
             if ($kiem_tra->fetch(PDO::FETCH_ASSOC)) {
@@ -34,17 +46,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mat_khau_ma_hoa = password_hash($mat_khau, PASSWORD_DEFAULT);
 
                 // Tài khoản đăng ký mới mặc định là thành viên.
-                $them = $conn->prepare(
-                    'INSERT INTO nguoi_dung (ho_ten, email, so_dien_thoai, mat_khau, vai_tro)
-                     VALUES (:ho_ten, :email, :so_dien_thoai, :mat_khau, :vai_tro)'
-                );
+                $them = $pdo->prepare(
+    'INSERT INTO nguoi_dung
+    (ho_ten, email, so_dien_thoai, khoa, nganh, mat_khau, vai_tro)
+    VALUES
+    (:ho_ten, :email, :so_dien_thoai, :khoa, :nganh, :mat_khau, :vai_tro)'
+);
                 $them->execute([
-                    'ho_ten' => $ho_ten,
-                    'email' => $email,
-                    'so_dien_thoai' => $so_dien_thoai,
-                    'mat_khau' => $mat_khau_ma_hoa,
-                    'vai_tro' => 'thanh_vien',
-                ]);
+    'ho_ten' => $ho_ten,
+    'email' => $email,
+    'so_dien_thoai' => $so_dien_thoai,
+    'khoa' => $khoa,
+    'nganh' => $nganh,
+    'mat_khau' => $mat_khau_ma_hoa,
+    'vai_tro' => 'thanh_vien',
+]);
 
                 header('Location: dang_nhap.php?dang_ky=thanh_cong');
                 exit;
@@ -147,6 +163,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input id="so_dien_thoai" name="so_dien_thoai" type="tel" placeholder="Nhập số điện thoại" value="<?= htmlspecialchars($so_dien_thoai, ENT_QUOTES, 'UTF-8') ?>" autocomplete="tel" required>
                     </div>
                 </div>
+                <div class="field">
+    <label for="khoa">Khoa</label>
+    <div class="input-wrap">
+        <input
+            id="khoa"
+            name="khoa"
+            type="text"
+            placeholder="Nhập khoa"
+            value="<?= htmlspecialchars($khoa, ENT_QUOTES, 'UTF-8') ?>"
+            required
+        >
+    </div>
+</div>
+
+<div class="field">
+    <label for="nganh">Ngành</label>
+    <div class="input-wrap">
+        <input
+            id="nganh"
+            name="nganh"
+            type="text"
+            placeholder="Nhập ngành học"
+            value="<?= htmlspecialchars($nganh, ENT_QUOTES, 'UTF-8') ?>"
+            required
+        >
+    </div>
+</div>
                 <div class="field">
                     <label for="mat_khau">Mật khẩu</label>
                     <div class="input-wrap">

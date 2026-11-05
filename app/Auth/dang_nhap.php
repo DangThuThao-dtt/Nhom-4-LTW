@@ -34,28 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'vai_tro' => $nguoi_dung['vai_tro'],
             ];
 
-            try {
-                if (($_POST['ghi_nho'] ?? '') === '1') {
-                    taoGhiNhoDangNhap((int) $nguoi_dung['id']);
-                } else {
-                    thuHoiGhiNho();
-                }
-            } catch (Throwable $e) {
-                error_log($e->getMessage());
-                unset($_SESSION['nguoi_dung']);
-                $thong_bao = 'Không thể ghi nhớ đăng nhập. Vui lòng thử lại.';
-            }
+        if ($thong_bao === '') {
+    if ($nguoi_dung['vai_tro'] === 'admin') {
+        header('Location: /Nhom-4-LTW/public/index.php?trang=admin');
+    } elseif ($nguoi_dung['vai_tro'] === 'ban_to_chuc') {
+        header('Location: /Nhom-4-LTW/public/index.php?trang=ban_to_chuc');
+    } else {
+        header('Location: /Nhom-4-LTW/public/index.php?trang=trang-chu');
+    }
 
-            if ($thong_bao === '') {
-                if ($nguoi_dung['vai_tro'] === 'admin') {
-                    header('Location: /Nhom-4-LTW/public/index.php?trang=admin');
-                } elseif ($nguoi_dung['vai_tro'] === 'ban_to_chuc') {
-                    header('Location: /Nhom-4-LTW/public/index.php?trang=ban_to_chuc');
-                } else {
-                    header('Location: /Nhom-4-LTW/public/index.php?trang=thanh_vien');
-                }
-                exit;
-            }
+    exit;
+}
         } else {
             $thong_bao = 'Email hoặc mật khẩu không đúng.';
         }
@@ -237,7 +226,7 @@ function e(string $value): string
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" action="">
+                <form method="POST" action="" autocomplete="on">
 
                     <div class="field">
                         <label for="email">Email đăng nhập</label>
@@ -294,15 +283,6 @@ function e(string $value): string
                     </div>
 
                     <div class="options">
-                        <label class="remember">
-                            <input
-                                type="checkbox"
-                                name="ghi_nho"
-                                value="1"
-                                <?= isset($_POST['ghi_nho']) ? 'checked' : '' ?>
-                            >
-                            <span>Nhớ tài khoản</span>
-                        </label>
 
                         <a href="quen_mat_khau.php">Quên mật khẩu?</a>
                     </div>

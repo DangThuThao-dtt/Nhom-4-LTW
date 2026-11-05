@@ -1,4 +1,3 @@
-
 CREATE DATABASE IF NOT EXISTS quan_ly_su_kien
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
@@ -38,7 +37,6 @@ CREATE TABLE su_kien (
     cau_lac_bo_id INT NOT NULL,
     ten_su_kien VARCHAR(200) NOT NULL,
     mo_ta TEXT DEFAULT NULL,
-    hinh_anh VARCHAR(255) DEFAULT NULL,
     dia_diem VARCHAR(255) DEFAULT NULL,
     thoi_gian_bat_dau DATETIME NOT NULL,
     thoi_gian_ket_thuc DATETIME DEFAULT NULL,
@@ -48,6 +46,7 @@ CREATE TABLE su_kien (
     nguoi_tao_id INT NOT NULL,
     ngay_tao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     han_dang_ky DATETIME DEFAULT NULL,
+    hinh_anh VARCHAR(255) DEFAULT NULL,
 
     INDEX idx_su_kien_cau_lac_bo (cau_lac_bo_id),
     INDEX idx_su_kien_nguoi_tao (nguoi_tao_id),
@@ -100,21 +99,3 @@ CREATE TABLE thong_bao (
         REFERENCES su_kien(id)
         ON DELETE SET NULL
 );
-
--- 6. Ghi nho dang nhap
-CREATE TABLE ghi_nho_dang_nhap (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nguoi_dung_id INT NOT NULL,
-    selector CHAR(32) NOT NULL UNIQUE,
-    token_hash CHAR(64) NOT NULL,
-    het_han DATETIME NOT NULL,
-    ngay_tao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    INDEX idx_ghi_nho_nguoi_dung (nguoi_dung_id),
-
-    FOREIGN KEY (nguoi_dung_id)
-        REFERENCES nguoi_dung(id)
-        ON DELETE CASCADE
-);
-
-
