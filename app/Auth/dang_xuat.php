@@ -3,9 +3,6 @@
 
 require_once __DIR__ . '/../Core/xac_thuc.php';
 
-// Thu hồi token ghi nhớ trước khi xóa session.
-thuHoiGhiNho();
-
 $_SESSION = [];
 
 if (ini_get('session.use_cookies')) {

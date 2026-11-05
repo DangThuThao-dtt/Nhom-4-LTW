@@ -1,0 +1,200 @@
+:root {
+    --green: #183f35;
+    --green-hover: #285748;
+    --green-light: #e7eee8;
+    --beige: #f7f5ed;
+    --white: #ffffff;
+    --text: #26352e;
+    --muted: #758078;
+    --border: #e5e7df;
+    --gold: #c99a50;
+    --red: #c6534b;
+    --shadow: 0 5px 20px rgba(31, 55, 43, 0.06);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--beige);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+h1 {
+    margin-top: 0;
+    color: var(--green);
+    font-size: 27px;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.container {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding: 25px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--white);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+}
+.menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.menu-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: #fff;
+}
+
+.btn,
+button.btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 9px 15px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--green);
+    color: var(--white);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.btn:hover,
+button.btn:hover {
+    background: var(--green-hover);
+}
+
+.delete-btn {
+    background: var(--red);
+}
+
+.delete-btn:hover {
+    background: #a63c36;
+}
+
+.view-btn {
+    background: #426d5c;
+}
+
+.view-btn:hover {
+    background: var(--green-hover);
+}
+
+/* BANG SU KIEN */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: var(--white);
+}
+
+thead {
+    background: var(--green-light);
+}
+
+th {
+    color: var(--green);
+    font-weight: 700;
+    text-align: left;
+}
+
+th,
+td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+tbody tr:hover {
+    background: #fbfbf7;
+}
+
+.empty {
+    padding: 30px;
+    color: var(--muted);
+    text-align: center;
+}
+
+/* CAC NUT THAO TAC */
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+}
+
+.actions .btn {
+    font-size: 12px;
+}
+
+.actions form {
+    margin: 0;
+}
+
+/* LINK QUAY LAI */
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: var(--green);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--green-hover);
+    text-decoration: underline;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+    .container {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 850px;
+    }
+}
+
+@media (max-width: 700px) {
+    body {
+        padding: 16px;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+}

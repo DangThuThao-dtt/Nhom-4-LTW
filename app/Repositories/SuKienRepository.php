@@ -48,6 +48,7 @@ class SuKienRepository
                 s.thoi_gian_bat_dau,
                 s.so_luong_toi_da,
                 s.trang_thai,
+                 s.hinh_anh,
 
                 COALESCE(tk.so_nguoi_dang_ky, 0)
                     AS so_nguoi_dang_ky,
@@ -171,37 +172,51 @@ class SuKienRepository
      * Them su kien moi.
      */
     public function them(array $duLieu): bool
-    {
-        $sql = "
-            INSERT INTO su_kien (
-                cau_lac_bo_id,
-                ten_su_kien,
-                mo_ta,
-                dia_diem,
-                thoi_gian_bat_dau,
-                thoi_gian_ket_thuc,
-                han_dang_ky,
-                so_luong_toi_da,
-                trang_thai,
-                nguoi_tao_id
-            ) VALUES (
-                :cau_lac_bo_id,
-                :ten_su_kien,
-                :mo_ta,
-                :dia_diem,
-                :bat_dau,
-                :ket_thuc,
-                :han_dang_ky,
-                :so_luong,
-                :trang_thai,
-                :nguoi_tao_id
-            )
-        ";
+{
+    $sql = "
+        INSERT INTO su_kien (
+            cau_lac_bo_id,
+            ten_su_kien,
+            mo_ta,
+            dia_diem,
+            thoi_gian_bat_dau,
+            thoi_gian_ket_thuc,
+            han_dang_ky,
+            so_luong_toi_da,
+            trang_thai,
+            nguoi_tao_id,
+            hinh_anh
+        ) VALUES (
+            :cau_lac_bo_id,
+            :ten_su_kien,
+            :mo_ta,
+            :dia_diem,
+            :bat_dau,
+            :ket_thuc,
+            :han_dang_ky,
+            :so_luong,
+            :trang_thai,
+            :nguoi_tao_id,
+            :hinh_anh
+        )
+    ";
 
-        $stmt = $this->pdo->prepare($sql);
+    $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute($duLieu);
-    }
+    return $stmt->execute([
+        'cau_lac_bo_id' => $duLieu['cau_lac_bo_id'],
+        'ten_su_kien' => $duLieu['ten_su_kien'],
+        'mo_ta' => $duLieu['mo_ta'],
+        'dia_diem' => $duLieu['dia_diem'],
+        'bat_dau' => $duLieu['bat_dau'],
+        'ket_thuc' => $duLieu['ket_thuc'],
+        'han_dang_ky' => $duLieu['han_dang_ky'],
+        'so_luong' => $duLieu['so_luong'],
+        'trang_thai' => $duLieu['trang_thai'],
+        'nguoi_tao_id' => $duLieu['nguoi_tao_id'],
+        'hinh_anh' => $duLieu['hinh_anh'] ?? null
+    ]);
+}
 
     /**
      * Lay su kien theo ID va kiem tra quyen quan ly.
@@ -276,7 +291,8 @@ class SuKienRepository
                 thoi_gian_ket_thuc = :ket_thuc,
                 han_dang_ky = :han_dang_ky,
                 so_luong_toi_da = :so_luong,
-                trang_thai = :trang_thai
+                trang_thai = :trang_thai,
+                hinh_anh = :hinh_anh
             WHERE id = :id
         ";
 
@@ -311,18 +327,44 @@ class SuKienRepository
      * Xoa su kien.
      */
     public function xoa(int $id): bool
-    {
-        $sql = "
+{
+    try {
+        $this->pdo->beginTransaction();
+
+        // Xoa thong bao lien quan den su kien
+        $sqlThongBao = "
+            DELETE FROM thong_bao
+            WHERE su_kien_id = :id
+        ";
+
+        $stmtThongBao = $this->pdo->prepare($sqlThongBao);
+        $stmtThongBao->execute([
+            'id' => $id
+        ]);
+
+        // Xoa su kien
+        $sqlSuKien = "
             DELETE FROM su_kien
             WHERE id = :id
         ";
 
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([
+        $stmtSuKien = $this->pdo->prepare($sqlSuKien);
+        $stmtSuKien->execute([
             'id' => $id
         ]);
+
+        $this->pdo->commit();
+
+        return true;
+
+    } catch (PDOException $e) {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+
+        throw $e;
     }
+}
 
     /**
      * Huy su kien.
@@ -481,4 +523,53 @@ class SuKienRepository
             'so_nguoi_huy' => 0
         ];
     }
+    public function thongKeTheoNguoiTao(int $nguoiTaoId): array
+{
+    $sql = "
+        SELECT
+            sk.id,
+            sk.ten_su_kien,
+            sk.thoi_gian_bat_dau,
+            sk.so_luong_toi_da,
+            sk.trang_thai,
+
+            COUNT(
+                CASE
+                    WHEN dk.trang_thai IN ('da_dang_ky', 'da_tham_gia')
+                    THEN dk.id
+                END
+            ) AS so_nguoi_dang_ky,
+
+            COUNT(
+                CASE
+                    WHEN dk.trang_thai = 'da_tham_gia'
+                    THEN dk.id
+                END
+            ) AS so_nguoi_da_tham_gia
+
+        FROM su_kien sk
+
+        LEFT JOIN dang_ky dk
+            ON dk.su_kien_id = sk.id
+
+        WHERE sk.nguoi_tao_id = :nguoi_tao_id
+
+        GROUP BY
+            sk.id,
+            sk.ten_su_kien,
+            sk.thoi_gian_bat_dau,
+            sk.so_luong_toi_da,
+            sk.trang_thai
+
+        ORDER BY sk.thoi_gian_bat_dau DESC
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    $stmt->execute([
+        'nguoi_tao_id' => $nguoiTaoId
+    ]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }

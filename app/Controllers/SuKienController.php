@@ -19,17 +19,51 @@ class SuKienController
      * Lay danh sach su kien theo quyen nguoi dung.
      */
     public function danhSach()
-    {
-        yeuCauDangNhap();
+{
+    yeuCauDangNhap();
 
-        $nguoiDung = nguoiDungHienTai();
+    $nguoiDung = nguoiDungHienTai();
 
-        $suKienList = $this->suKienRepository
-            ->danhSachTheoVaiTro($nguoiDung);
+    $suKienList = $this->suKienRepository
+        ->danhSachTheoVaiTro($nguoiDung);
 
-        require __DIR__ . '/../Views/ban_to_chuc/danh_sach_su_kien.php';
+    // Lay ten cau lac bo cua nguoi dang dang nhap
+    $tenCauLacBo = 'Câu lạc bộ';
+
+    if (($nguoiDung['vai_tro'] ?? '') === 'ban_to_chuc') {
+        $idNguoiDung = (int) $nguoiDung['id'];
+
+        $cauLacBoId = $this->suKienRepository
+            ->layCauLacBoTheoNguoiQuanLy($idNguoiDung);
+
+        if ($cauLacBoId !== null) {
+            $tenCauLacBo = $this->suKienRepository
+                ->tenCauLacBo((int) $cauLacBoId);
+        }
     }
 
+    // Dem so thong bao chua doc
+$soThongBaoChuaDoc = 0;
+
+if (!empty($nguoiDung['id'])) {
+    global $pdo;
+
+    $stmtDemThongBao = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM thong_bao
+        WHERE nguoi_dung_id = :nguoi_dung_id
+          AND da_doc = 0
+    ");
+
+    $stmtDemThongBao->execute([
+        'nguoi_dung_id' => (int) $nguoiDung['id']
+    ]);
+
+    $soThongBaoChuaDoc = (int) $stmtDemThongBao->fetchColumn();
+}
+
+require __DIR__ . '/../Views/ban_to_chuc/danh_sach_su_kien.php';
+}
     /**
      * Chuyen chuoi ngay gio tu input datetime-local thanh DateTime.
      */
@@ -105,6 +139,70 @@ public function them()
     );
 
     $trangThai = $_POST['trang_thai'] ?? 'nhap';
+    // Xu ly anh su kien.
+$hinhAnh = null;
+
+if (
+    isset($_FILES['hinh_anh']) &&
+    $_FILES['hinh_anh']['error'] !== UPLOAD_ERR_NO_FILE
+) {
+    $fileAnh = $_FILES['hinh_anh'];
+
+    // Kiem tra loi upload.
+    if ($fileAnh['error'] !== UPLOAD_ERR_OK) {
+        http_response_code(400);
+        exit('Tai anh len that bai.');
+    }
+
+    // Gioi han dung luong 3 MB.
+    if ($fileAnh['size'] > 3 * 1024 * 1024) {
+        http_response_code(400);
+        exit('Anh khong duoc vuot qua 3 MB.');
+    }
+
+    // Kiem tra MIME thuc te cua file.
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mimeType = $finfo->file($fileAnh['tmp_name']);
+
+    $danhSachMime = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp'
+    ];
+
+    if (!isset($danhSachMime[$mimeType])) {
+        http_response_code(400);
+        exit('Chi chap nhan anh JPG, PNG hoac WEBP.');
+    }
+
+    // Tao ten file ngau nhien, khong dung ten file nguoi dung gui.
+    $tenFile = bin2hex(random_bytes(16))
+        . '.'
+        . $danhSachMime[$mimeType];
+
+    // Thu muc luu anh trong public.
+    $thuMucAnh = dirname(__DIR__, 2)
+        . '/public/assets/image/su_kien';
+
+    if (
+        !is_dir($thuMucAnh) &&
+        !mkdir($thuMucAnh, 0755, true)
+    ) {
+        http_response_code(500);
+        exit('Khong tao duoc thu muc luu anh.');
+    }
+
+    $duongDanFile = $thuMucAnh . '/' . $tenFile;
+
+    if (!move_uploaded_file($fileAnh['tmp_name'], $duongDanFile)) {
+        http_response_code(500);
+        exit('Khong the luu anh su kien.');
+    }
+
+    // Duong dan luu vao database.
+    $hinhAnh = '/Nhom-4-LTW/public/assets/image/su_kien/'
+        . $tenFile;
+}
 
     if (
         $tenSuKien === '' ||
@@ -194,26 +292,27 @@ public function them()
 
     // Chuan bi du lieu gui sang Repository.
     $duLieu = [
-        'cau_lac_bo_id' => (int) $cauLacBoId,
-        'ten_su_kien' => $tenSuKien,
-        'mo_ta' => $moTa !== '' ? $moTa : null,
-        'dia_diem' => $diaDiem !== '' ? $diaDiem : null,
-        'bat_dau' => $batDauNgay->format('Y-m-d H:i:s'),
-        'ket_thuc' => $ketThucNgay !== null
-            ? $ketThucNgay->format('Y-m-d H:i:s')
-            : null,
-        'han_dang_ky' => $hanDangKyNgay !== null
-            ? $hanDangKyNgay->format('Y-m-d H:i:s')
-            : null,
-        'so_luong' => (int) $soLuong,
-        'trang_thai' => $trangThai,
-        'nguoi_tao_id' => $nguoiTaoId
-    ];
+    'cau_lac_bo_id' => (int) $cauLacBoId,
+    'ten_su_kien' => $tenSuKien,
+    'mo_ta' => $moTa !== '' ? $moTa : null,
+    'dia_diem' => $diaDiem !== '' ? $diaDiem : null,
+    'bat_dau' => $batDauNgay->format('Y-m-d H:i:s'),
+    'ket_thuc' => $ketThucNgay !== null
+        ? $ketThucNgay->format('Y-m-d H:i:s')
+        : null,
+    'han_dang_ky' => $hanDangKyNgay !== null
+        ? $hanDangKyNgay->format('Y-m-d H:i:s')
+        : null,
+    'so_luong' => (int) $soLuong,
+    'trang_thai' => $trangThai,
+    'nguoi_tao_id' => $nguoiTaoId,
+    'hinh_anh' => $hinhAnh
+];
 
     $this->suKienRepository->them($duLieu);
 
     header(
-        'Location: /Nhom-4-LTW/public/index.php?trang=danh_sach'
+        'Location: /Nhom-4-LTW/public/index.php?trang=danh_sach_su_kien_clb'
     );
     exit;
 }
@@ -353,6 +452,66 @@ public function sua()
             );
         }
     }
+    // Giữ ảnh hiện tại nếu không chọn ảnh mới.
+$hinhAnh = $suKien['hinh_anh'] ?? null;
+
+if (
+    isset($_FILES['hinh_anh']) &&
+    $_FILES['hinh_anh']['error'] !== UPLOAD_ERR_NO_FILE
+) {
+    $fileAnh = $_FILES['hinh_anh'];
+
+    if ($fileAnh['error'] !== UPLOAD_ERR_OK) {
+        http_response_code(400);
+        exit('Tai anh len that bai.');
+    }
+
+    // Giới hạn 3 MB.
+    if ($fileAnh['size'] > 3 * 1024 * 1024) {
+        http_response_code(400);
+        exit('Anh khong duoc vuot qua 3 MB.');
+    }
+
+    // Kiểm tra loại ảnh.
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mimeType = $finfo->file($fileAnh['tmp_name']);
+
+    $danhSachMime = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp'
+    ];
+
+    if (!isset($danhSachMime[$mimeType])) {
+        http_response_code(400);
+        exit('Chi chap nhan anh JPG, PNG hoac WEBP.');
+    }
+
+    $tenFile = bin2hex(random_bytes(16))
+        . '.'
+        . $danhSachMime[$mimeType];
+
+    $thuMucAnh = dirname(__DIR__, 2)
+        . '/public/assets/image/su_kien';
+
+    if (
+        !is_dir($thuMucAnh) &&
+        !mkdir($thuMucAnh, 0755, true)
+    ) {
+        http_response_code(500);
+        exit('Khong tao duoc thu muc luu anh.');
+    }
+
+    $duongDanFile = $thuMucAnh . '/' . $tenFile;
+
+    if (!move_uploaded_file($fileAnh['tmp_name'], $duongDanFile)) {
+        http_response_code(500);
+        exit('Khong the luu anh su kien.');
+    }
+
+    $hinhAnh = '/Nhom-4-LTW/public/assets/image/su_kien/'
+        . $tenFile;
+}
 
     $duLieu = [
         'ten_su_kien' => $tenSuKien,
@@ -366,13 +525,14 @@ public function sua()
             ? $hanDangKyNgay->format('Y-m-d H:i:s')
             : null,
         'so_luong' => (int) $soLuong,
-        'trang_thai' => $trangThai
+        'trang_thai' => $trangThai,
+        'hinh_anh' => $hinhAnh
     ];
 
     $this->suKienRepository->capNhat((int) $id, $duLieu);
 
     header(
-        'Location: /Nhom-4-LTW/public/index.php?trang=danh_sach'
+        'Location: /Nhom-4-LTW/public/index.php?trang=danh_sach_su_kien_clb'
     );
     exit;
 }
@@ -416,7 +576,7 @@ public function xoa()
     $this->suKienRepository->xoa((int) $id);
 
     header(
-        'Location: /Nhom-4-LTW/public/index.php?trang=danh_sach'
+        'Location: /Nhom-4-LTW/public/index.php?trang=danh_sach_su_kien_clb'
     );
     exit;
 }
@@ -461,7 +621,7 @@ public function huy()
         )
     ) {
         header(
-            'Location: /Nhom-4-LTW/public/index.php?trang=danh_sach'
+            'Location: /Nhom-4-LTW/public/index.php?trang=danh_sach_su_kien_clb'
         );
         exit;
     }
@@ -469,26 +629,73 @@ public function huy()
     $this->suKienRepository->huy((int) $id);
 
     header(
-        'Location: /Nhom-4-LTW/public/index.php?trang=danh_sach'
+        'Location: /Nhom-4-LTW/public/index.php?trang=danh_sach_su_kien_clb'
     );
     exit;
 }
 
 
 /**
- * Hien thi danh sach nguoi dang ky cua mot su kien.
+ * Hien thi danh sach su kien hoac danh sach nguoi dang ky.
  */
 public function danhSachDangKy()
 {
     yeuCauVaiTro(['ban_to_chuc', 'admin']);
 
+    $nguoiDung = nguoiDungHienTai();
+    global $pdo;
+
+$tenCauLacBo = 'Câu lạc bộ';
+
+if (!empty($nguoiDung['cau_lac_bo_id'])) {
+    $stmtCauLacBo = $pdo->prepare("
+        SELECT ten_cau_lac_bo
+        FROM cau_lac_bo
+        WHERE id = :cau_lac_bo_id
+        LIMIT 1
+    ");
+
+    $stmtCauLacBo->execute([
+        'cau_lac_bo_id' => (int) $nguoiDung['cau_lac_bo_id']
+    ]);
+
+    $tenCauLacBo = $stmtCauLacBo->fetchColumn()
+        ?: 'Câu lạc bộ';
+}
+    // Dem so thong bao chua doc
+global $pdo;
+
+$soThongBaoChuaDoc = 0;
+
+$stmtDemThongBao = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM thong_bao
+    WHERE nguoi_dung_id = :nguoi_dung_id
+      AND da_doc = 0
+");
+
+$stmtDemThongBao->execute([
+    'nguoi_dung_id' => (int) $nguoiDung['id']
+]);
+
+$soThongBaoChuaDoc = (int) $stmtDemThongBao->fetchColumn();
+
+    // Chua chon su kien: hien thi danh sach su kien.
     $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
-    if (!$id || $id < 1) {
-        http_response_code(400);
-        exit('ID su kien khong hop le.');
+    if ($id === null || $id === false) {
+        $id = 0;
     }
 
+    if ($id < 1) {
+        $suKienList = $this->suKienRepository
+            ->danhSachTheoVaiTro($nguoiDung);
+
+        require __DIR__ . '/../Views/ban_to_chuc/danh_sach_dang_ky.php';
+        return;
+    }
+
+    // Da chon su kien: hien thi danh sach nguoi dang ky.
     $suKien = $this->laySuKienDuocPhep((int) $id);
 
     if (!$suKien) {
@@ -564,6 +771,7 @@ public function diemDanh()
 }
 
 
+
 /**
  * Hien thi chi tiet su kien cho Ban to chuc va Admin.
  */
@@ -585,13 +793,72 @@ public function chiTiet()
         exit('Khong tim thay su kien hoac ban khong co quyen.');
     }
 
+    // Lay ten cau lac bo cua su kien.
     $tenCauLacBo = $this->suKienRepository
         ->tenCauLacBo((int) $suKien['cau_lac_bo_id']);
 
+    // Dua ten cau lac bo vao du lieu su kien de view hien thi.
+    $suKien['ten_cau_lac_bo'] = $tenCauLacBo;
+
+    // Lay thong ke dang ky.
     $thongKe = $this->suKienRepository
         ->thongKeDangKy((int) $id);
 
+    // Truyen du lieu sang view.
     require __DIR__ . '/../Views/ban_to_chuc/chi_tiet_su_kien.php';
 }
+public function thongKe()
+{
+    yeuCauVaiTro(['ban_to_chuc']);
 
+    $nguoiDung = nguoiDungHienTai();
+
+    $idNguoiDung = (int) $nguoiDung['id'];
+
+    $thongKeList = $this->suKienRepository
+        ->thongKeTheoNguoiTao($idNguoiDung);
+
+    $tongSuKien = count($thongKeList);
+
+    $tongNguoiDangKy = 0;
+    $tongNguoiDaThamGia = 0;
+
+    foreach ($thongKeList as $suKien) {
+        $tongNguoiDangKy += (int) $suKien['so_nguoi_dang_ky'];
+        $tongNguoiDaThamGia += (int) $suKien['so_nguoi_da_tham_gia'];
+    }
+
+        global $pdo;
+
+    $tenCauLacBo = 'Câu lạc bộ';
+
+    $stmtTenClb = $pdo->prepare("
+        SELECT ten_cau_lac_bo
+        FROM cau_lac_bo
+        WHERE nguoi_quan_ly_id = :nguoi_dung_id
+        LIMIT 1
+    ");
+
+    $stmtTenClb->execute([
+        'nguoi_dung_id' => $idNguoiDung
+    ]);
+
+    $tenCauLacBo = $stmtTenClb->fetchColumn()
+        ?: 'Câu lạc bộ';
+
+    $stmtDemThongBao = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM thong_bao
+        WHERE nguoi_dung_id = :nguoi_dung_id
+          AND da_doc = 0
+    ");
+
+    $stmtDemThongBao->execute([
+        'nguoi_dung_id' => $idNguoiDung
+    ]);
+
+    $soThongBaoChuaDoc = (int) $stmtDemThongBao->fetchColumn();
+
+    require __DIR__ . '/../Views/ban_to_chuc/thong_ke.php';
+}
 }
